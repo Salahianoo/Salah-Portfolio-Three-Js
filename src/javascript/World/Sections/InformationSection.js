@@ -22,8 +22,9 @@ export default class InformationSection
         this.container.matrixAutoUpdate = false
 
         this.setFlag()
+        this.removeFrenchLandmarks()
+        this.removeTwitterPedestal()
         this.setStatic()
-        this.setBaguettes()
         this.setLinks()
         this.setActivities()
         this.setTiles()
@@ -100,42 +101,63 @@ export default class InformationSection
         }
     }
 
-    setBaguettes()
+    /**
+     * Drops nodes out of the static base and collision scenes by name.
+     *
+     * GLTFLoader strips the dots from Blender's names, so "shadeGray.007" and
+     * "Cube.055" read as "shadeGray007" and "Cube055" here.
+     */
+    removeStaticNodes(_baseNames, _collisionNames)
     {
-        this.baguettes = {}
+        const scenes = [
+            { scene: this.resources.items.informationStaticBase.scene, names: _baseNames },
+            { scene: this.resources.items.informationStaticCollision.scene, names: _collisionNames }
+        ]
 
-        this.baguettes.x = - 4
-        this.baguettes.y = 6
+        for(const _target of scenes)
+        {
+            for(const _node of _target.scene.children.filter((_child) => _target.names.includes(_child.name)))
+            {
+                _target.scene.remove(_node)
+            }
+        }
+    }
 
-        this.baguettes.a = this.objects.add({
-            base: this.resources.items.informationBaguetteBase.scene,
-            collision: this.resources.items.informationBaguetteCollision.scene,
-            offset: new THREE.Vector3(this.x + this.baguettes.x - 0.56, this.y + this.baguettes.y - 0.666, 0.2),
-            rotation: new THREE.Euler(0, 0, - Math.PI * 37 / 180),
-            duplicated: true,
-            shadow: { sizeX: 0.6, sizeY: 3.5, offsetZ: - 0.15, alpha: 0.35 },
-            mass: 1.5,
-            // soundName: 'woodHit'
-        })
+    /**
+     * The static model is set in Paris: an Eiffel Tower stands beside the
+     * flagpole. It reads as French landmark next to a Jordanian flag, so it
+     * goes. The baguettes that used to lie at its foot were a separate
+     * `objects.add()` pair and are simply no longer added.
+     *
+     * Its shadow is painted into the static floorShadow texture and cannot be
+     * removed from there without repainting the texture, so the blob was
+     * erased from the PNG rather than left hanging over bare floor.
+     */
+    removeFrenchLandmarks()
+    {
+        this.removeStaticNodes(['shadeGray007'], ['Cube055'])
+    }
 
-        this.baguettes.b = this.objects.add({
-            base: this.resources.items.informationBaguetteBase.scene,
-            collision: this.resources.items.informationBaguetteCollision.scene,
-            offset: new THREE.Vector3(this.x + this.baguettes.x - 0.8, this.y + this.baguettes.y - 2, 0.5),
-            rotation: new THREE.Euler(0, - 0.5, Math.PI * 60 / 180),
-            duplicated: true,
-            shadow: { sizeX: 0.6, sizeY: 3.5, offsetZ: - 0.15, alpha: 0.35 },
-            mass: 1.5,
-            sleep: false,
-            // soundName: 'woodHit'
-        })
+    /**
+     * The contact row was modelled with four pedestals — Twitter, GitHub,
+     * LinkedIn, mail — but Content.js only lists three links. Drop the Twitter
+     * bird and the plinth it stood on so the remaining three figures line up
+     * with the three link areas (see `this.links.x`).
+     */
+    removeTwitterPedestal()
+    {
+        this.removeStaticNodes(['shadeOrange005', 'shadeWhite_033'], ['Cube063', 'Cube067'])
     }
 
     setLinks()
     {
         // Set up
         this.links = {}
-        this.links.x = 1.95
+        // The pedestals sit at local x = 1.88, 4.28, 6.68, 9.08. The first one
+        // held the Twitter bird and is removed, so the three links start on the
+        // second pedestal — otherwise every label sits one plinth to the left of
+        // the figure it names and the mail envelope gets none at all.
+        this.links.x = 4.35
         this.links.y = - 1.5
         this.links.halfExtents = {}
         this.links.halfExtents.x = 1

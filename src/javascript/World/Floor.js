@@ -15,12 +15,14 @@ export default class Floor
         // Geometry
         this.geometry = new THREE.PlaneGeometry(2, 2, 10, 10)
 
-        // Colors
+        // Colors — cool purple along the top edge easing down into cyan, keeping
+        // the original's lightness ladder (saturated at the top, pale at the
+        // bottom) so the scene reads the same way it did in orange.
         this.colors = {}
-        this.colors.topLeft = '#f5883c'
-        this.colors.topRight = '#ff9043'
-        this.colors.bottomRight = '#fccf92'
-        this.colors.bottomLeft = '#f5aa58'
+        this.colors.topLeft = '#6a4a9e'
+        this.colors.topRight = '#5f4fb0'
+        this.colors.bottomRight = '#a8e8f0'
+        this.colors.bottomLeft = '#6fc4dd'
 
         // Material
         this.material = new FloorMaterial()

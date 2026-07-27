@@ -40,7 +40,8 @@ export default class Project
         this.boards.xStart = - 5
         this.boards.xInter = 5
         this.boards.y = 5
-        this.boards.color = '#8e7161'
+        // Shown until the slide texture finishes loading and fades in over it
+        this.boards.color = '#6b6e8e'
         this.boards.threeColor = new THREE.Color(this.boards.color)
 
         if(this.debug)

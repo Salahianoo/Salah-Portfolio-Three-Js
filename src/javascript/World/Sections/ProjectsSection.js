@@ -74,7 +74,7 @@ export default class ProjectsSection
         // Generated from Content.js — no pre-baked image assets required.
         // Replace Content.js projects with real screenshots/links later; the
         // placeholder slide art and floor labels below are generated at runtime.
-        const slideColors = ['#2b6cb0', '#2f855a', '#6b46c1', '#c05621', '#2c7a7b']
+        const slideColors = ['#2b6cb0', '#2c7a7b', '#6b46c1', '#3182ce', '#4c51bf']
 
         this.list = Content.projects.map((_project, _index) =>
         {
