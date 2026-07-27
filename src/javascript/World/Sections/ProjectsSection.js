@@ -71,22 +71,28 @@ export default class ProjectsSection
 
     setList()
     {
-        // Generated from Content.js — no pre-baked image assets required.
-        // Replace Content.js projects with real screenshots/links later; the
-        // placeholder slide art and floor labels below are generated at runtime.
+        // Built from Content.js. A project that lists `images` gets those on its
+        // boards; one that does not falls back to generated placeholder slides,
+        // so the section still reads before any screenshots exist.
+        //
+        // One board is created per image, so the array length sets how many
+        // boards a project has. The board plane is 4.671 x 2.714, i.e. 1.72:1 —
+        // 1600x930 fits it exactly, and 16:9 is close enough not to notice.
         const slideColors = ['#2b6cb0', '#2c7a7b', '#6b46c1', '#3182ce', '#4c51bf']
 
         this.list = Content.projects.map((_project, _index) =>
         {
             const color = slideColors[_index % slideColors.length]
 
-            const imageSources = ['Overview', 'Details', 'Tech stack'].map((_label) => createTextImageDataURL(
-                [
-                    { text: _project.name, x: 40, y: 90, fontSize: 56, fontWeight: 900 },
-                    { text: _label, x: 40, y: 160, fontSize: 32, fontWeight: 400, color: '#dddddd' }
-                ],
-                { width: 800, height: 400, background: color }
-            ))
+            const imageSources = _project.images && _project.images.length > 0
+                ? _project.images
+                : ['Overview', 'Details', 'Tech stack'].map((_label) => createTextImageDataURL(
+                    [
+                        { text: _project.name, x: 40, y: 100, fontSize: 62, fontWeight: 900 },
+                        { text: _label, x: 40, y: 178, fontSize: 34, fontWeight: 400, color: '#dddddd' }
+                    ],
+                    { width: 1600, height: 930, background: color }
+                ))
 
             const floorTexture = createTextTexture(
                 [

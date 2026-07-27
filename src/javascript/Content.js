@@ -23,22 +23,38 @@ export default {
         { title: 'Web Development', subtitle: 'Full-stack websites' }
     ],
 
-    // TODO: replace with your real projects (name, description, link)
+    /**
+     * TODO: replace with your real projects.
+     *
+     * `images` are the screenshots shown on the boards you drive past. Drop the
+     * files in `static/images/projects/` and reference them from the site root,
+     * e.g. '/images/projects/my-app-1.png'. One board is created per image, so
+     * three entries gives three boards.
+     *
+     * The board is 1.72:1 — 1600x930 fits exactly, 16:9 is near enough. Leave
+     * `images` empty and a generated placeholder slide is used instead.
+     *
+     * `link` is where the OPEN pad on the floor sends people; empty falls back
+     * to the GitHub profile in `profile.social`.
+     */
     projects: [
         {
             name: 'Flutter Mobile App',
             description: 'Cross-platform mobile application built with Flutter.',
-            link: ''
+            link: '',
+            images: []
         },
         {
             name: 'Odoo ERP Solution',
             description: 'Custom ERP implementation streamlining business operations.',
-            link: ''
+            link: '',
+            images: []
         },
         {
             name: 'Web Platform',
             description: 'Web application powered by a Supabase/Firebase backend.',
-            link: ''
+            link: '',
+            images: []
         }
     ]
 }
