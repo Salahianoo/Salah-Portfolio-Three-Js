@@ -39,16 +39,46 @@ export default {
      */
     projects: [
         {
-            name: 'Flutter Mobile App',
-            description: 'Cross-platform mobile application built with Flutter.',
+            name: 'Qisma',
+            // Kept short on purpose — this renders as a single unwrapped line
+            // on the floor beside the boards
+            description: 'AI-powered bill splitting & money tracking.',
             link: '',
-            images: []
+            images: ['/images/projects/qisma-1.png']
         },
         {
-            name: 'Odoo ERP Solution',
-            description: 'Custom ERP implementation streamlining business operations.',
+            name: 'LoopFruit',
+            description: 'Fast, colourful memory game. 7 modes, daily challenge.',
             link: '',
-            images: []
+            images: ['/images/projects/loopfruit-1.png']
+        },
+        {
+            name: 'Adatuna',
+            description: 'Arab heritage, curated. Arabic-first, RTL native.',
+            link: '',
+            images: ['/images/projects/adatuna-1.png']
+        },
+        {
+            name: 'Odoo ERP',
+            description: 'Custom ERP implementations for business operations.',
+            link: '',
+            images: ['/images/projects/odoo_hero_1600x930.png']
+        },
+        {
+            // TODO: rename if this module has a proper name — the card carries
+            // no title, so this one is inferred from the artwork
+            name: 'Odoo Warehouse',
+            description: 'Supply chain & inventory with live telemetry.',
+            link: '',
+            images: ['/images/projects/odoo-warehouse.png']
+        },
+        {
+            // TODO: rename if this module has a proper name — the card carries
+            // no title, so this one is inferred from the artwork
+            name: 'Odoo HR',
+            description: 'Time-off requests, approvals & org structure.',
+            link: '',
+            images: ['/images/projects/hr_hero_1600x930.png']
         },
         {
             name: 'Web Platform',

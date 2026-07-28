@@ -51,6 +51,22 @@ export default class Areas
             }
         })
 
+        /**
+         * Leaving the hovered area is only ever detected by a raycast on the
+         * next mousemove. Opening a project link hands focus to a new tab, so
+         * no such event arrives and the area stays hovered with its pointer
+         * cursor still applied. Drop the hover when the window loses focus.
+         */
+        window.addEventListener('blur', () =>
+        {
+            if(this.mouse.currentArea)
+            {
+                this.mouse.currentArea.out()
+                this.mouse.currentArea.testCar = this.mouse.currentArea.initialTestCar
+                this.mouse.currentArea = null
+            }
+        })
+
         // Touch
         this.renderer.domElement.addEventListener('touchstart', (_event) =>
         {

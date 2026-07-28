@@ -37,8 +37,10 @@ export default class Project
         // Set up
         this.boards = {}
         this.boards.items = []
-        this.boards.xStart = - 5
         this.boards.xInter = 5
+        // Centre the row on the project whatever its board count. Hardcoding
+        // this to -5 only lined up when a project had exactly three images.
+        this.boards.xStart = - ((this.imageSources.length - 1) * this.boards.xInter) * 0.5
         this.boards.y = 5
         // Shown until the slide texture finishes loading and fades in over it
         this.boards.color = '#6b6e8e'

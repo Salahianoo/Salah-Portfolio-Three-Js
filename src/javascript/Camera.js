@@ -281,6 +281,18 @@ export default class Camera
             this.pan.up()
         })
 
+        /**
+         * Areas open their links with window.open on mousedown, which hands
+         * focus to the new tab before mouseup ever arrives here. Without this
+         * the drag is never released: the grabbing cursor sticks and pan.active
+         * stays true, so the camera pans on a bare mouse move once the visitor
+         * comes back. Blur also covers alt-tabbing mid-drag.
+         */
+        window.addEventListener('blur', () =>
+        {
+            this.pan.up()
+        })
+
         // Touch
         this.renderer.domElement.addEventListener('touchstart', (_event) =>
         {

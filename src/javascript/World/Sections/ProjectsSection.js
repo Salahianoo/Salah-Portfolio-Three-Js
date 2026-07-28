@@ -2,6 +2,7 @@ import * as THREE from 'three'
 import Project from './Project'
 import gsap from 'gsap'
 import { createTextTexture, createTextImageDataURL } from '../../Utils/TextTexture.js'
+import { createSignpost } from '../../Utils/Props.js'
 import Content from '../../Content.js'
 
 export default class ProjectsSection
@@ -31,9 +32,13 @@ export default class ProjectsSection
         // Set up
         this.items = []
 
-        this.interDistance = 24
-        this.positionRandomess = 5
-        this.projectHalfWidth = 9
+        // Spacing between consecutive projects. The tile path between two of
+        // them runs from x + projectHalfWidth to x + interDistance -
+        // projectHalfWidth, so interDistance has to stay above twice the half
+        // width or the connecting path inverts.
+        this.interDistance = 16
+        this.positionRandomess = 4
+        this.projectHalfWidth = 6
 
         this.container = new THREE.Object3D()
         this.container.matrixAutoUpdate = false
@@ -48,6 +53,49 @@ export default class ProjectsSection
         for(const _options of this.list)
         {
             this.add(_options)
+        }
+
+        this.setCategorySignposts()
+    }
+
+    /**
+     * Replicas of the crossroads fingerposts, one per run of related projects,
+     * so a visitor driving in knows what they are looking at.
+     *
+     * Each group names a slice of the project list by start index and length —
+     * extend a `count` when a category gains a project, and the sign re-centres
+     * itself on whatever it covers.
+     */
+    setCategorySignposts()
+    {
+        this.signposts = {}
+        this.signposts.groups = [
+            { text: 'MOBILE APPS', start: 0, count: 3 },
+            { text: 'ERP SYSTEMS', start: 3, count: 3 }
+        ]
+        this.signposts.items = []
+
+        for(const _group of this.signposts.groups)
+        {
+            const covered = this.items.slice(_group.start, _group.start + _group.count)
+            if(covered.length === 0)
+            {
+                continue
+            }
+
+            // Centred on the group in x. It has to stand clear of the board row
+            // in y rather than on it: with an odd number of projects the
+            // centroid lands exactly on the middle project's board. The OPEN
+            // pads reach to project.y - 6.5, so -9 clears those too.
+            const x = covered.reduce((_total, _project) => _total + _project.x, 0) / covered.length
+            const y = covered.reduce((_total, _project) => _total + _project.y, 0) / covered.length - 9
+
+            const options = createSignpost(_group.text)
+            options.offset.x += x
+            options.offset.y += y
+            this.objects.add(options)
+
+            this.signposts.items.push({ text: _group.text, x, y })
         }
     }
 
@@ -94,10 +142,15 @@ export default class ProjectsSection
                     { width: 1600, height: 930, background: color }
                 ))
 
+            // Inset from the left edge. The label plane is 16 units wide, so a
+            // texture x of 20 put the text at project.x - 7.69 — out past where
+            // the connecting tile path ends (project.x - projectHalfWidth), and
+            // the first characters were being covered by a tile. 210 brings it
+            // in to project.x - 4.72, clear of the path.
             const floorTexture = createTextTexture(
                 [
-                    { text: _project.name, x: 20, y: 60, fontSize: 44, fontWeight: 900 },
-                    { text: _project.description, x: 24, y: 120, fontSize: 22, fontWeight: 400, color: '#999999' }
+                    { text: _project.name, x: 210, y: 60, fontSize: 44, fontWeight: 900 },
+                    { text: _project.description, x: 214, y: 120, fontSize: 22, fontWeight: 400, color: '#999999' }
                 ],
                 { width: 1024, height: 512 }
             )

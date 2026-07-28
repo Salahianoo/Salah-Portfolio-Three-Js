@@ -1,6 +1,6 @@
 {
-    "name": "Bruno Simon",
-    "short_name": "Bruno Simon",
+    "name": "Salah AbuShamseih",
+    "short_name": "Salah AbuShamseih",
     "icons": [
         {
             "src": "/favicon/android-chrome-192x192.png",
@@ -13,7 +13,7 @@
             "type": "image/png"
         }
     ],
-    "theme_color": "#ffffff",
-    "background_color": "#ffffff",
+    "theme_color": "#6a4a9e",
+    "background_color": "#6a4a9e",
     "display": "standalone"
 }

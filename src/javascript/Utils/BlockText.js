@@ -3,7 +3,7 @@ import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js'
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js'
 import fontSource from 'three/examples/fonts/helvetiker_bold.typeface.json'
 
-const font = new FontLoader().parse(fontSource)
+export const font = new FontLoader().parse(fontSource)
 
 // Placeholder material — the Objects parser swaps in the real matcap shade
 // based on the mesh name, but a Mesh still needs something at construction.
@@ -13,7 +13,7 @@ const placeholderMaterial = new THREE.MeshBasicMaterial()
  * Cap height of the font at size 1, measured once, so callers can ask for a
  * height in world units instead of guessing a font size.
  */
-const capHeightRatio = (() =>
+export const capHeightRatio = (() =>
 {
     const geometry = new TextGeometry('H', { font, size: 1, depth: 1, curveSegments: 1, bevelEnabled: false })
     geometry.computeBoundingBox()
