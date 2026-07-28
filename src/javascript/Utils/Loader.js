@@ -47,6 +47,44 @@ export default class Resources extends EventEmitter
             }
         })
 
+        // SVG
+        //
+        // Rasterised onto a canvas rather than handed straight to a texture.
+        // These files carry a viewBox but no width/height, so an <img> has an
+        // intrinsic ratio and no intrinsic size — the browser would fall back to
+        // the 300x150 default object size and the screens would come out blurry.
+        // Drawing at an explicit width keeps them sharp.
+        this.loaders.push({
+            extensions: ['svg'],
+            action: (_resource) =>
+            {
+                const width = _resource.rasterWidth || 1024
+                const image = new Image()
+
+                image.addEventListener('load', () =>
+                {
+                    // Fall back to the decoded size if the viewBox is missing
+                    const ratio = image.naturalWidth > 0 ? image.naturalHeight / image.naturalWidth : 1
+
+                    const canvas = document.createElement('canvas')
+                    canvas.width = width
+                    canvas.height = Math.round(width * ratio)
+
+                    canvas.getContext('2d').drawImage(image, 0, 0, canvas.width, canvas.height)
+
+                    this.fileLoadEnd(_resource, canvas)
+                })
+
+                image.addEventListener('error', () =>
+                {
+                    console.warn(`Could not load ${_resource.source}`)
+                    this.fileLoadEnd(_resource, document.createElement('canvas'))
+                })
+
+                image.src = _resource.source
+            }
+        })
+
         // Draco
         const dracoLoader = new DRACOLoader()
         dracoLoader.setDecoderPath('draco/')

@@ -10,9 +10,16 @@ export default {
         bio: 'Versatile software developer specializing in website creation and mobile development with Flutter, powered by scalable backends like Supabase and Firebase. I also lead and implement tailored ERP Odoo solutions to streamline complex business operations.',
         email: 'salahshadi2005@gmail.com',
         social: {
+            instagram: 'https://www.instagram.com/salah.abushamseih/',
             github: 'https://github.com/Salahianoo',
             linkedin: 'https://www.linkedin.com/in/salah-abushamseih-aa1864305/'
         }
+    },
+
+    // Shown on the university building in the information section
+    education: {
+        institution: 'The Hashemite University',
+        degree: 'Computer Engineer'
     },
 
     // TODO: replace with your real achievements/certifications

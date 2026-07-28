@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 import { createTextTexture } from '../../Utils/TextTexture.js'
 import { createJordanFlagTexture } from '../../Utils/FlagTexture.js'
+import { createUniversity, createInstagramGlyph, applyScreenTextures } from '../../Utils/Props.js'
 import Content from '../../Content.js'
 
 export default class InformationSection
@@ -23,9 +24,11 @@ export default class InformationSection
 
         this.setFlag()
         this.removeFrenchLandmarks()
-        this.removeTwitterPedestal()
+        this.removeTwitterBird()
         this.setStatic()
+        this.setInstagramGlyph()
         this.setLinks()
+        this.setEducation()
         this.setActivities()
         this.setTiles()
     }
@@ -140,24 +143,37 @@ export default class InformationSection
 
     /**
      * The contact row was modelled with four pedestals — Twitter, GitHub,
-     * LinkedIn, mail — but Content.js only lists three links. Drop the Twitter
-     * bird and the plinth it stood on so the remaining three figures line up
-     * with the three link areas (see `this.links.x`).
+     * LinkedIn, mail. Only the Twitter bird and its collider go; the plinth it
+     * stood on (`shadeWhite_033` / `Cube063`) stays and carries Instagram
+     * instead, so the row is still four figures against four link areas.
      */
-    removeTwitterPedestal()
+    removeTwitterBird()
     {
-        this.removeStaticNodes(['shadeOrange005', 'shadeWhite_033'], ['Cube063', 'Cube067'])
+        this.removeStaticNodes(['shadeOrange005'], ['Cube067'])
+    }
+
+    /**
+     * Instagram has no modelled figure, so one is extruded to stand on the
+     * vacated plinth. Sits at the plinth's local (1.88, 0.67); its top face is
+     * at z 0.47 and the neighbouring figures reach about z 1.8.
+     */
+    setInstagramGlyph()
+    {
+        const options = createInstagramGlyph(1.12)
+        options.offset.x += this.x + 1.88
+        options.offset.y += this.y + 0.67
+
+        this.objects.add(options)
     }
 
     setLinks()
     {
         // Set up
         this.links = {}
-        // The pedestals sit at local x = 1.88, 4.28, 6.68, 9.08. The first one
-        // held the Twitter bird and is removed, so the three links start on the
-        // second pedestal — otherwise every label sits one plinth to the left of
-        // the figure it names and the mail envelope gets none at all.
-        this.links.x = 4.35
+        // The pedestals sit at local x = 1.88, 4.28, 6.68, 9.08 and the areas
+        // step by 2.4, so the row starts on the first plinth — the one now
+        // carrying Instagram.
+        this.links.x = 1.95
         this.links.y = - 1.5
         this.links.halfExtents = {}
         this.links.halfExtents.x = 1
@@ -173,8 +189,9 @@ export default class InformationSection
         this.container.add(this.links.container)
 
         // The github and linkedin labels are just the plain service names, so the
-        // baked textures still fit. The mail one spelled out the address, so it
-        // is redrawn from Content.js to match the same white-on-black style.
+        // baked textures still fit. The mail one spelled out the address, and
+        // instagram was never modelled, so both are drawn from Content.js in the
+        // same white-on-black style.
         this.links.mailLabelTexture = createTextTexture(
             [
                 { text: 'MAIL', x: 4, y: 34, fontSize: 54, fontWeight: 900 },
@@ -183,8 +200,19 @@ export default class InformationSection
             { width: 512, height: 128 }
         )
 
+        this.links.instagramLabelTexture = createTextTexture(
+            [
+                { text: 'INSTAGRAM', x: 4, y: 34, fontSize: 54, fontWeight: 900, maxWidth: 504 }
+            ],
+            { width: 512, height: 128 }
+        )
+
         // Options (see Content.js for real values)
         this.links.options = [
+            {
+                href: Content.profile.social.instagram,
+                labelTexture: this.links.instagramLabelTexture
+            },
             {
                 href: Content.profile.social.github,
                 labelTexture: this.resources.items.informationContactGithubLabelTexture
@@ -237,6 +265,58 @@ export default class InformationSection
 
             i++
         }
+    }
+
+    /**
+     * The university building, west of the road, with the degree written on the
+     * floor in front of it the same way the achievements panel is.
+     *
+     * The spot is clear in the static model: the nearest scenery is the tree at
+     * (-8.84, 1.03) and the rocks around (-8.2, -0.5), all north of it.
+     */
+    setEducation()
+    {
+        this.education = {}
+        this.education.x = - 9.5
+        this.education.y = - 4
+
+        const options = createUniversity({ logo: this.resources.items.universityLogoTexture })
+        options.offset.x += this.x + this.education.x
+        options.offset.y += this.y + this.education.y
+
+        this.objects.add(options)
+        applyScreenTextures(options)
+
+        // Floor label, in front of the building and clear of the achievements
+        // panel which starts at local x = -5.5
+        this.education.label = {}
+        this.education.label.width = 8
+        this.education.label.height = 2.25
+
+        // Canvas kept to the text's own proportions, so the panel is not mostly
+        // empty and the lettering reads at the same size as the achievements one
+        this.education.label.texture = createTextTexture(
+            [
+                { text: 'EDUCATION', x: 20, y: 58, fontSize: 68, fontWeight: 900 },
+                { text: Content.education.institution, x: 24, y: 150, fontSize: 48, fontWeight: 700, maxWidth: 976 },
+                { text: Content.education.degree, x: 24, y: 212, fontSize: 32, fontWeight: 400, color: '#999999' }
+            ],
+            { width: 1024, height: 288 }
+        )
+        this.education.label.texture.magFilter = THREE.NearestFilter
+        this.education.label.texture.minFilter = THREE.LinearFilter
+
+        this.education.label.mesh = new THREE.Mesh(
+            new THREE.PlaneGeometry(this.education.label.width, this.education.label.height, 1, 1),
+            new THREE.MeshBasicMaterial({ color: 0xffffff, alphaMap: this.education.label.texture, transparent: true })
+        )
+        // Pushed west of the building's centre line so the tree at (-6.34,
+        // -10.02) does not stand on the lettering
+        this.education.label.mesh.position.x = this.x + this.education.x - 1.5
+        this.education.label.mesh.position.y = this.y + this.education.y - 7
+        this.education.label.mesh.matrixAutoUpdate = false
+        this.education.label.mesh.updateMatrix()
+        this.container.add(this.education.label.mesh)
     }
 
     setActivities()

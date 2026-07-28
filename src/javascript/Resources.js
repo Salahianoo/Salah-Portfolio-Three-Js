@@ -47,6 +47,14 @@ export default class Resources extends EventEmitter
             { name: 'crossroadsStaticCollision', source: './models/crossroads/static/collision.glb' },
             { name: 'crossroadsStaticFloorShadow', source: './models/crossroads/static/floorShadow.png', type: 'texture' },
 
+            // Crossroads plinth screens (see Utils/Props.js)
+            { name: 'screenCodeEditor', source: './images/monitor_left_code_editor.svg', type: 'texture' },
+            { name: 'screenDashboard', source: './images/monitor_center_dashboard.svg', type: 'texture' },
+            { name: 'screenTerminal', source: './images/monitor_right_terminal.svg', type: 'texture' },
+            { name: 'screenDesignBoard', source: './images/design_board_wireframes.svg', type: 'texture' },
+            { name: 'screenOdoo', source: './images/laptop_odoo_app_launcher.svg', type: 'texture' },
+            { name: 'screenPhone', source: './images/phone_tech_stack.svg', type: 'texture', rasterWidth: 512 },
+
             // Car default
             { name: 'carDefaultChassis', source: './models/car/default/chassis.glb' },
             { name: 'carDefaultWheel', source: './models/car/default/wheel.glb' },
@@ -77,6 +85,8 @@ export default class Resources extends EventEmitter
 
             { name: 'informationContactGithubLabel', source: './models/information/static/contactGithubLabel.png', type: 'texture' },
             { name: 'informationContactLinkedinLabel', source: './models/information/static/contactLinkedinLabel.png', type: 'texture' },
+
+            { name: 'universityLogo', source: './images/HU_logo-removebg-preview.png', type: 'texture' },
 
             // Playground
             { name: 'playgroundStaticBase', source: './models/playground/static/base.glb' },

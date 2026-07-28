@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { createSmartphone, createLaptop, createCodingDesk, createDesignBoards, createServerRack } from '../../Utils/Props.js'
+import { createSmartphone, createLaptop, createCodingDesk, createDesignBoards, createServerRack, applyScreenTextures } from '../../Utils/Props.js'
 
 export default class CrossroadsSection
 {
@@ -181,28 +181,55 @@ export default class CrossroadsSection
         const { toCamera, right } = this.plinths
         const along = (_vector, _distance) => [_vector.x * _distance, _vector.y * _distance]
 
+        const items = this.resources.items
+
         this.props = [
             // Centre — the code. Sits just beyond the seated figure so the
             // monitors face back past their shoulder toward the camera.
-            { build: createCodingDesk, plinth: [0, 0], offset: along(toCamera, - 0.15) },
+            {
+                build: createCodingDesk,
+                screens: {
+                    left: items.screenCodeEditorTexture,
+                    center: items.screenDashboardTexture,
+                    right: items.screenTerminalTexture
+                },
+                plinth: [0, 0],
+                offset: along(toCamera, - 0.15)
+            },
             // NE — collaboration, boards to the figure's left
-            { build: createDesignBoards, plinth: [9, 9], offset: along(right, - 0.9) },
+            {
+                build: createDesignBoards,
+                screens: { board: items.screenDesignBoardTexture },
+                plinth: [9, 9],
+                offset: along(right, - 0.9)
+            },
             // SE — web / Odoo, laptop to the figure's right
-            { build: createLaptop, plinth: [9, - 9], offset: along(right, 0.75) },
+            {
+                build: createLaptop,
+                screens: { lid: items.screenOdooTexture },
+                plinth: [9, - 9],
+                offset: along(right, 0.75)
+            },
             // NW / SW — no figure, so these sit centred
-            { build: createSmartphone, plinth: [- 9, 9], offset: [0, 0] },
+            {
+                build: createSmartphone,
+                screens: { phone: items.screenPhoneTexture },
+                plinth: [- 9, 9],
+                offset: [0, 0]
+            },
             { build: createServerRack, plinth: [- 9, - 9], offset: [0, 0] }
         ]
 
         for(const _prop of this.props)
         {
-            const options = _prop.build()
+            const options = _prop.build(_prop.screens)
 
             options.offset.x += this.x + _prop.plinth[0] + _prop.offset[0]
             options.offset.y += this.y + _prop.plinth[1] + _prop.offset[1]
             options.offset.z += this.plinths.topZ
 
             this.objects.add(options)
+            applyScreenTextures(options)
         }
     }
 
