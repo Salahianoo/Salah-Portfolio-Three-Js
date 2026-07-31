@@ -35,8 +35,12 @@ export default class ProjectsSection
         // Spacing between consecutive projects. The tile path between two of
         // them runs from x + projectHalfWidth to x + interDistance -
         // projectHalfWidth, so interDistance has to stay above twice the half
-        // width or the connecting path inverts.
+        // width (12) or the connecting path inverts.
         this.interDistance = 16
+        // Tighter spacing used only between two projects in the same category
+        // group (see setLayout) — 14 is the floor with a 2-unit safety margin
+        // above the 12-unit limit above.
+        this.tightInterDistance = 14
         this.positionRandomess = 4
         this.projectHalfWidth = 6
 
@@ -46,6 +50,7 @@ export default class ProjectsSection
 
         this.setGeometries()
         this.setMeshes()
+        this.setLayout()
         this.setList()
         this.setZone()
 
@@ -59,23 +64,57 @@ export default class ProjectsSection
     }
 
     /**
+     * Precomputes every project's x position and the category groups they
+     * belong to, before any Project is actually built. Two projects in the
+     * same group sit `tightInterDistance` apart instead of `interDistance`,
+     * so e.g. the three Odoo modules read as one cluster.
+     *
+     * Doing this analytically up front — rather than accumulating a running
+     * x inside `add()` — means `setZone()` can size its trigger volume off the
+     * real last position instead of assuming uniform spacing.
+     */
+    setLayout()
+    {
+        // `tight: true` pulls that group's own members closer together; groups
+        // without it keep the default spacing. Only ERP SYSTEMS was asked to
+        // cluster tighter — MOBILE APPS stays at the original spacing.
+        this.categoryGroups = [
+            { text: 'MOBILE APPS', start: 0, count: 3 },
+            { text: 'ERP SYSTEMS', start: 3, count: 3, tight: true }
+        ]
+
+        const inGroup = (_index, _group) => _index >= _group.start && _index < _group.start + _group.count
+
+        this.positions = []
+        let cursor = this.x
+
+        for(let i = 0; i < Content.projects.length; i++)
+        {
+            if(i > 0)
+            {
+                const sameGroup = this.categoryGroups.find((_group) => inGroup(i - 1, _group) && inGroup(i, _group))
+                cursor += (sameGroup && sameGroup.tight) ? this.tightInterDistance : this.interDistance
+            }
+
+            this.positions.push(cursor)
+        }
+    }
+
+    /**
      * Replicas of the crossroads fingerposts, one per run of related projects,
      * so a visitor driving in knows what they are looking at.
      *
-     * Each group names a slice of the project list by start index and length —
-     * extend a `count` when a category gains a project, and the sign re-centres
-     * itself on whatever it covers.
+     * Each group in `categoryGroups` (see setLayout) names a slice of the
+     * project list by start index and length — extend a `count` when a
+     * category gains a project, and the sign re-centres itself on whatever it
+     * covers.
      */
     setCategorySignposts()
     {
         this.signposts = {}
-        this.signposts.groups = [
-            { text: 'MOBILE APPS', start: 0, count: 3 },
-            { text: 'ERP SYSTEMS', start: 3, count: 3 }
-        ]
         this.signposts.items = []
 
-        for(const _group of this.signposts.groups)
+        for(const _group of this.categoryGroups)
         {
             const covered = this.items.slice(_group.start, _group.start + _group.count)
             if(covered.length === 0)
@@ -159,24 +198,25 @@ export default class ProjectsSection
                 name: _project.name,
                 imageSources,
                 floorTexture,
-                link:
-                {
-                    href: _project.link || Content.profile.social.github,
-                    x: - 4.8,
-                    y: - 3,
-                    halfExtents:
-                    {
-                        x: 3.2,
-                        y: 1.5
-                    }
-                }
+                // {href} when there's a real destination, else null — Project.js
+                // shows the "OPEN" pad only in the first case, a plain `status`
+                // label in the second, and nothing at all if both are empty
+                link: _project.link ? { href: _project.link } : null,
+                status: _project.status || null,
+                labelPosition: { x: - 4.8, y: - 3 },
+                labelHalfExtents: { x: 3.2, y: 1.5 }
             }
         })
     }
 
     setZone()
     {
-        const totalWidth = this.list.length * (this.interDistance / 2)
+        // Half the real span from the first to the last project, in place of
+        // the old `list.length * (interDistance / 2)` — that assumed every
+        // gap was the same size, which stopped being true once category
+        // groups could use tightInterDistance.
+        const lastX = this.positions[this.positions.length - 1]
+        const totalWidth = (lastX - this.x) / 2
 
         const zone = this.zones.add({
             position: { x: this.x + totalWidth - this.projectHalfWidth - 6, y: this.y },
@@ -201,7 +241,7 @@ export default class ProjectsSection
 
     add(_options)
     {
-        const x = this.x + this.items.length * this.interDistance
+        const x = this.positions[this.items.length]
         let y = this.y
         if(this.items.length > 0)
         {

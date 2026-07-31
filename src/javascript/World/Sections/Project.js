@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 
 import ProjectBoardMaterial from '../../Materials/ProjectBoard.js'
+import { createTextTexture } from '../../Utils/TextTexture.js'
 import gsap from 'gsap'
 
 export default class Project
@@ -21,7 +22,13 @@ export default class Project
         this.y = _options.y
         this.imageSources = _options.imageSources
         this.floorTexture = _options.floorTexture
+        // {href} when the project has somewhere real to send people, else null
         this.link = _options.link
+        // A plain-text floor label ("COMING SOON"...) shown instead of a link
+        // when there's nothing to open yet but it's still worth flagging
+        this.status = _options.status
+        this.labelPosition = _options.labelPosition
+        this.labelHalfExtents = _options.labelHalfExtents
 
         // Set up
         this.container = new THREE.Object3D()
@@ -142,23 +149,53 @@ export default class Project
         this.floor.mesh.matrixAutoUpdate = false
         this.floor.container.add(this.floor.mesh)
 
-        // Area
-        this.floor.area = this.areas.add({
-            position: new THREE.Vector2(this.x + this.link.x, this.y + this.floor.y + this.link.y),
-            halfExtents: new THREE.Vector2(this.link.halfExtents.x, this.link.halfExtents.y)
-        })
-        this.floor.area.on('interact', () =>
+        // A real, published link: the clickable "OPEN" pad, unchanged from
+        // before. Nothing below this branch runs — no pad and no label for a
+        // project with neither a link nor a status.
+        if(this.link)
         {
-            window.open(this.link.href, '_blank')
-        })
+            this.floor.area = this.areas.add({
+                position: new THREE.Vector2(this.x + this.labelPosition.x, this.y + this.floor.y + this.labelPosition.y),
+                halfExtents: new THREE.Vector2(this.labelHalfExtents.x, this.labelHalfExtents.y)
+            })
+            this.floor.area.on('interact', () =>
+            {
+                window.open(this.link.href, '_blank')
+            })
 
-        // Area label
-        this.floor.areaLabel = this.meshes.areaLabel.clone()
-        this.floor.areaLabel.position.x = this.link.x
-        this.floor.areaLabel.position.y = this.link.y
-        this.floor.areaLabel.position.z = 0.001
-        this.floor.areaLabel.matrixAutoUpdate = false
-        this.floor.areaLabel.updateMatrix()
-        this.floor.container.add(this.floor.areaLabel)
+            this.floor.areaLabel = this.meshes.areaLabel.clone()
+            this.floor.areaLabel.position.x = this.labelPosition.x
+            this.floor.areaLabel.position.y = this.labelPosition.y
+            this.floor.areaLabel.position.z = 0.001
+            this.floor.areaLabel.matrixAutoUpdate = false
+            this.floor.areaLabel.updateMatrix()
+            this.floor.container.add(this.floor.areaLabel)
+        }
+        // Not live yet: a plain status label at the same spot. No Area is
+        // created, so there's nothing to walk into or press ENTER on.
+        else if(this.status)
+        {
+            // fontSize measured to fill the canvas the way the baked "OPEN"
+            // texture does — at 46 the text sat small and high (y=34 on a
+            // 128-tall canvas, textBaseline is 'middle' so that's nowhere near
+            // centre) and read as noticeably weaker than "OPEN" at the same
+            // distance. 58 is the largest size "COMING SOON" fits without
+            // clipping the 512-wide canvas; y=64 is dead centre.
+            this.floor.statusTexture = createTextTexture(
+                [{ text: this.status, x: 16, y: 64, fontSize: 58, fontWeight: 900, color: '#ffffff' }],
+                { width: 512, height: 128 }
+            )
+            this.floor.statusTexture.magFilter = THREE.NearestFilter
+            this.floor.statusTexture.minFilter = THREE.LinearFilter
+
+            this.floor.statusLabel = new THREE.Mesh(
+                new THREE.PlaneGeometry(2, 0.5),
+                new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false, color: 0xffffff, alphaMap: this.floor.statusTexture })
+            )
+            this.floor.statusLabel.position.set(this.labelPosition.x, this.labelPosition.y, 0.001)
+            this.floor.statusLabel.matrixAutoUpdate = false
+            this.floor.statusLabel.updateMatrix()
+            this.floor.container.add(this.floor.statusLabel)
+        }
     }
 }

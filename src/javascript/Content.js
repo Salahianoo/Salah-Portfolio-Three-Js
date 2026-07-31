@@ -41,8 +41,15 @@ export default {
      * The board is 1.72:1 — 1600x930 fits exactly, 16:9 is near enough. Leave
      * `images` empty and a generated placeholder slide is used instead.
      *
-     * `link` is where the OPEN pad on the floor sends people; empty falls back
-     * to the GitHub profile in `profile.social`.
+     * `link` is where the floor pad sends people when clicked. A project's
+     * floor pad has three possible states, decided by `link` and `status`:
+     *   - `link` set        -> clickable "OPEN" pad, opens that URL
+     *   - `link` empty, `status` set   -> a plain text label (e.g. "COMING
+     *     SOON"), not clickable — for something real but not live yet
+     *   - both empty         -> no pad and no label at all — for entries with
+     *     nothing to send anyone to (client/internal work)
+     * There is no fallback link any more: a project with no `link` no longer
+     * silently opens the GitHub profile.
      */
     projects: [
         {
@@ -51,21 +58,25 @@ export default {
             // on the floor beside the boards
             description: 'AI-powered bill splitting & money tracking.',
             link: '',
+            status: 'COMING SOON',
             images: ['/images/projects/qisma-1.png']
         },
         {
             name: 'LoopFruit',
             description: 'Fast, colourful memory game. 7 modes, daily challenge.',
-            link: '',
+            link: 'https://play.google.com/store/apps/details?id=com.salah.loopfruit',
             images: ['/images/projects/loopfruit-1.png']
         },
         {
             name: 'Adatuna',
             description: 'Arab heritage, curated. Arabic-first, RTL native.',
             link: '',
+            status: 'COMING SOON',
             images: ['/images/projects/adatuna-1.png']
         },
         {
+            // No link and no status: client/internal work with nothing public
+            // to send a visitor to, so no floor pad at all
             name: 'Odoo ERP',
             description: 'Custom ERP implementations for business operations.',
             link: '',
@@ -74,7 +85,7 @@ export default {
         {
             // TODO: rename if this module has a proper name — the card carries
             // no title, so this one is inferred from the artwork
-            name: 'Odoo Warehouse',
+            name: 'Odoo Sales & Inventory',
             description: 'Supply chain & inventory with live telemetry.',
             link: '',
             images: ['/images/projects/odoo-warehouse.png']
@@ -86,12 +97,13 @@ export default {
             description: 'Time-off requests, approvals & org structure.',
             link: '',
             images: ['/images/projects/hr_hero_1600x930.png']
-        },
-        {
-            name: 'Web Platform',
-            description: 'Web application powered by a Supabase/Firebase backend.',
-            link: '',
-            images: []
         }
+
+        // Placeholder removed — was 'Web Platform', a generic stand-in with no
+        // real screenshots or link. Re-add a real entry here (with an `images`
+        // array) for an actual web project; copy the shape of the entries
+        // above. Leaving this out changes nothing else: the category signposts
+        // in ProjectsSection.js only cover indices 0-2 and 3-5, so removing the
+        // trailing 7th entry doesn't shift either group.
     ]
 }
