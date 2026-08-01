@@ -1,0 +1,18 @@
+{
+    // Tells Cloudflare's "npx wrangler deploy" step where the built site lives.
+    // Vite's build.outDir in vite.config.js is '../dist' relative to its root
+    // ('src/'), which resolves to dist/ at the repo root — this must match.
+    "name": "salah-portfolio-three-js",
+    "compatibility_date": "2026-08-01",
+    "assets": {
+        "directory": "./dist"
+
+        // No "not_found_handling" set — every current URL is the single "/"
+        // (in-app navigation uses #hash, not paths, e.g. #debug/#cybertruck
+        // in Application.js), so default 404 behaviour is correct.
+        // If the planned /project/<slug> deep-linking is ever built (see the
+        // portfolio-domain-and-deep-links memory), this needs:
+        //   "not_found_handling": "single-page-application"
+        // so an unmatched path serves index.html instead of a real 404.
+    }
+}
