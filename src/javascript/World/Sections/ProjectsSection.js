@@ -79,8 +79,8 @@ export default class ProjectsSection
         // without it keep the default spacing. Only ERP SYSTEMS was asked to
         // cluster tighter — MOBILE APPS stays at the original spacing.
         this.categoryGroups = [
-            { text: 'MOBILE APPS', start: 0, count: 3 },
-            { text: 'ERP SYSTEMS', start: 3, count: 3, tight: true }
+            { text: 'MOBILE APPS', start: 0, count: 4 },
+            { text: 'ERP SYSTEMS', start: 4, count: 3, tight: true }
         ]
 
         const inGroup = (_index, _group) => _index >= _group.start && _index < _group.start + _group.count
@@ -186,10 +186,14 @@ export default class ProjectsSection
             // the connecting tile path ends (project.x - projectHalfWidth), and
             // the first characters were being covered by a tile. 210 brings it
             // in to project.x - 4.72, clear of the path.
+            // maxWidth leaves ~20px of margin inside the 1024-wide canvas from
+            // the x inset. It is a guard, not the layout: descriptions are meant
+            // to be short enough not to reach it, but an over-long one now
+            // condenses to fit instead of silently running off the label.
             const floorTexture = createTextTexture(
                 [
-                    { text: _project.name, x: 210, y: 60, fontSize: 44, fontWeight: 900 },
-                    { text: _project.description, x: 214, y: 120, fontSize: 22, fontWeight: 400, color: '#999999' }
+                    { text: _project.name, x: 210, y: 60, fontSize: 44, fontWeight: 900, maxWidth: 790 },
+                    { text: _project.description, x: 214, y: 120, fontSize: 22, fontWeight: 400, color: '#999999', maxWidth: 790 }
                 ],
                 { width: 1024, height: 512 }
             )

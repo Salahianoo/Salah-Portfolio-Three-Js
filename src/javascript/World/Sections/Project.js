@@ -181,8 +181,11 @@ export default class Project
             // centre) and read as noticeably weaker than "OPEN" at the same
             // distance. 58 is the largest size "COMING SOON" fits without
             // clipping the 512-wide canvas; y=64 is dead centre.
+            //
+            // maxWidth condenses anything longer than that rather than letting
+            // it run off the edge, so a status is not capped at 11 characters.
             this.floor.statusTexture = createTextTexture(
-                [{ text: this.status, x: 16, y: 64, fontSize: 58, fontWeight: 900, color: '#ffffff' }],
+                [{ text: this.status, x: 16, y: 64, fontSize: 58, fontWeight: 900, color: '#ffffff', maxWidth: 480 }],
                 { width: 512, height: 128 }
             )
             this.floor.statusTexture.magFilter = THREE.NearestFilter

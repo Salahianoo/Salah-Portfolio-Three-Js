@@ -53,6 +53,20 @@ export default {
      */
     projects: [
         {
+            name: 'Mood',
+            // Trimmed hard from the written subtitle: this renders as a single
+            // unwrapped line on the floor, so roughly 70 characters is the
+            // ceiling before it runs off the label. The full version lives in
+            // `caseStudy` below.
+            description: 'Offline-first SaaS for a PS5 lounge & café. Flutter, Riverpod, Hive.',
+            link: '',
+            status: 'SOLD TO THE STORE',
+            images: ['/images/projects/Mood-portfolio-1600x930.png'],
+            // Not rendered anywhere yet — kept for the planned per-project
+            // pages. Nothing reads this field today.
+            caseStudy: 'Mood is a full offline operations system for a PlayStation gaming lounge and its attached coffee shop, built solo end-to-end — product decisions, UI, and the offline data layer. Staff run the whole venue from one Android tablet with no internet dependency: PS5 rooms bill by the second from a persisted timestamp (never a fragile in-memory timer, so a killed app never loses time), a "waiting for a friend" mode lets a table open and sell drinks before billing starts, and the café POS is stock-linked — selling an item decrements inventory automatically and reverses cleanly if removed. The shift-accounting layer goes beyond "cash collected": every product tracks cost price against sale price, so the end-of-shift summary separates revenue from actual profit, with a running log of non-resale operational expenses (supplies) netted in too. Every closed bill gets a permanent sequential number, shared across both floors, and stays in a 48-hour lookback archive after its shift closes — with confirm-gated delete for corrections. Built in Flutter with Riverpod for state and Hive for fully offline, on-device persistence — no backend, no signal required on site.'
+        },
+        {
             name: 'Qisma',
             // Kept short on purpose — this renders as a single unwrapped line
             // on the floor beside the boards
