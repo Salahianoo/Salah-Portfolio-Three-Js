@@ -89,6 +89,20 @@ export default {
             images: ['/images/projects/adatuna-1.png']
         },
         {
+            name: 'Exam Vault',
+            // Trimmed hard from the written material: single unwrapped line on
+            // the floor, ~70 characters is the ceiling. The full write-up
+            // (architecture, feature list, the overlay/rename problem it
+            // solves) lives in `caseStudy` below.
+            description: 'Arabic/RTL exam-paper library. Flutter app + React admin dashboard.',
+            link: '',
+            status: 'COMING SOON',
+            images: ['/images/projects/exam-vault-portfolio.png'],
+            // Not rendered anywhere yet — kept for the planned per-project
+            // pages, same as Mood's. Nothing reads this field today.
+            caseStudy: 'Exam Vault (خزنة الامتحانات) is a two-part system for distributing past exam papers at Hashemite University. Students use a Flutter app built entirely in Arabic and right-to-left: they drill down from a section (compulsory, elective, remedial) to a subject to an exam type — midterm, final, screens, or suggested questions — and read the PDF in an embedded viewer or download it for offline use, with favourites and recently-viewed papers kept on the device and a global search that jumps straight to any subject. Cached lists render before the network responds, so the app never opens to a blank screen or a spinner. Staff use a React + TypeScript dashboard that writes everything the app reads: they upload PDFs by drag-and-drop and create or rename sections, subjects, and exam types on the fly, all of which appear in students\' hands without an app-store release. Writes are restricted to a named admin allowlist enforced by server-side security rules; reads stay public, because open access is the point of the product. Both apps talk to the same Firebase project (Auth, Firestore, Storage, Hosting) — no backend service to deploy, patch, or pay for. The interesting problem: the mobile app ships with its subject lists compiled into the binary, so anything an admin adds has to reach students who are still running an older build — solved by layering the admin\'s data as Firestore overlays on top of the app\'s built-in defaults, with the built-ins acting as the offline fallback. The subtler problem was renaming: every uploaded file is keyed by its subject name, so a naive rename would orphan hundreds of PDFs, or worse, silently empty the subject for every user who hadn\'t updated yet — solved by separating each record\'s immutable storage key from its display label, so renaming changes only what\'s shown, files never move, and older builds keep working untouched.'
+        },
+        {
             // No link and no status: client/internal work with nothing public
             // to send a visitor to, so no floor pad at all
             name: 'Odoo ERP',

@@ -79,8 +79,8 @@ export default class ProjectsSection
         // without it keep the default spacing. Only ERP SYSTEMS was asked to
         // cluster tighter — MOBILE APPS stays at the original spacing.
         this.categoryGroups = [
-            { text: 'MOBILE APPS', start: 0, count: 4 },
-            { text: 'ERP SYSTEMS', start: 4, count: 3, tight: true }
+            { text: 'MOBILE APPS', start: 0, count: 5 },
+            { text: 'ERP SYSTEMS', start: 5, count: 3, tight: true }
         ]
 
         const inGroup = (_index, _group) => _index >= _group.start && _index < _group.start + _group.count
