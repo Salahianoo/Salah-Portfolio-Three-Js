@@ -59,7 +59,13 @@ export default {
             // ceiling before it runs off the label. The full version lives in
             // `caseStudy` below.
             description: 'Offline-first SaaS for a PS5 lounge & café. Flutter, Riverpod, Hive.',
-            link: '',
+            // The app itself isn't public — it was sold to one venue — so the
+            // link points at that venue's real-world location instead of a
+            // store listing. linkLabel swaps the default "OPEN" for wording
+            // that matches: this is somewhere to visit, not something to
+            // install.
+            link: 'https://www.google.com/maps/place/Mood+playstation/@31.8826775,35.9335109,128m/data=!3m1!1e3!4m6!3m5!1s0x151b59f9bb0ec86d:0x808d4cbaf487c109!8m2!3d31.8826375!4d35.9338281!16s%2Fg%2F11srrlh__h?hl=en-JO&entry=ttu&g_ep=EgoyMDI2MDgxMC4wIKXMDSoASAFQAw%3D%3D',
+            linkLabel: 'CHECK OUT THE STORE',
             status: 'SOLD TO THE STORE',
             images: ['/images/projects/Mood-portfolio-1600x930.png'],
             // Not rendered anywhere yet — kept for the planned per-project
@@ -71,8 +77,7 @@ export default {
             // Kept short on purpose — this renders as a single unwrapped line
             // on the floor beside the boards
             description: 'AI-powered bill splitting & money tracking.',
-            link: '',
-            status: 'COMING SOON',
+            link: 'https://play.google.com/store/apps/details?id=com.salah.qisma',
             images: ['/images/projects/qisma-1.png']
         },
         {

@@ -24,8 +24,10 @@ export default class Project
         this.floorTexture = _options.floorTexture
         // {href} when the project has somewhere real to send people, else null
         this.link = _options.link
-        // A plain-text floor label ("COMING SOON"...) shown instead of a link
-        // when there's nothing to open yet but it's still worth flagging
+        // Custom text on the link pad in place of the default "OPEN"
+        this.linkLabel = _options.linkLabel
+        // A plain-text floor label ("COMING SOON"...). Independent of `link` —
+        // may appear alone, alongside a link (stacked), or not at all
         this.status = _options.status
         this.labelPosition = _options.labelPosition
         this.labelHalfExtents = _options.labelHalfExtents
@@ -149,32 +151,20 @@ export default class Project
         this.floor.mesh.matrixAutoUpdate = false
         this.floor.container.add(this.floor.mesh)
 
-        // A real, published link: the clickable "OPEN" pad, unchanged from
-        // before. Nothing below this branch runs — no pad and no label for a
-        // project with neither a link nor a status.
-        if(this.link)
-        {
-            this.floor.area = this.areas.add({
-                position: new THREE.Vector2(this.x + this.labelPosition.x, this.y + this.floor.y + this.labelPosition.y),
-                halfExtents: new THREE.Vector2(this.labelHalfExtents.x, this.labelHalfExtents.y)
-            })
-            this.floor.area.on('interact', () =>
-            {
-                window.open(this.link.href, '_blank')
-            })
+        // `status` and `link` are independent: a project can show either one,
+        // both, or neither. When both are present (Mood: sold to a single
+        // venue, but worth visiting in person) they stack vertically, offset
+        // from the original single-label position so neither covers the
+        // other. With only one, that offset is zero and nothing changes from
+        // before.
+        const stacked = Boolean(this.link) && Boolean(this.status)
+        const stackOffset = 0.85
 
-            this.floor.areaLabel = this.meshes.areaLabel.clone()
-            this.floor.areaLabel.position.x = this.labelPosition.x
-            this.floor.areaLabel.position.y = this.labelPosition.y
-            this.floor.areaLabel.position.z = 0.001
-            this.floor.areaLabel.matrixAutoUpdate = false
-            this.floor.areaLabel.updateMatrix()
-            this.floor.container.add(this.floor.areaLabel)
-        }
-        // Not live yet: a plain status label at the same spot. No Area is
-        // created, so there's nothing to walk into or press ENTER on.
-        else if(this.status)
+        // Plain-text label, no Area — nothing to walk into or press ENTER on.
+        if(this.status)
         {
+            const y = this.labelPosition.y + (stacked ? stackOffset : 0)
+
             // fontSize measured to fill the canvas the way the baked "OPEN"
             // texture does — at 46 the text sat small and high (y=34 on a
             // 128-tall canvas, textBaseline is 'middle' so that's nowhere near
@@ -195,10 +185,54 @@ export default class Project
                 new THREE.PlaneGeometry(2, 0.5),
                 new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false, color: 0xffffff, alphaMap: this.floor.statusTexture })
             )
-            this.floor.statusLabel.position.set(this.labelPosition.x, this.labelPosition.y, 0.001)
+            this.floor.statusLabel.position.set(this.labelPosition.x, y, 0.001)
             this.floor.statusLabel.matrixAutoUpdate = false
             this.floor.statusLabel.updateMatrix()
             this.floor.container.add(this.floor.statusLabel)
+        }
+
+        // A real destination: the clickable pad. `linkLabel` swaps the baked
+        // "OPEN" texture for custom generated text — e.g. Mood's "CHECK OUT
+        // THE STORE", pointing at the physical venue rather than an app
+        // listing — leave it unset to keep the default "OPEN".
+        if(this.link)
+        {
+            const y = this.labelPosition.y - (stacked ? stackOffset : 0)
+
+            this.floor.area = this.areas.add({
+                position: new THREE.Vector2(this.x + this.labelPosition.x, this.y + this.floor.y + y),
+                halfExtents: new THREE.Vector2(this.labelHalfExtents.x, this.labelHalfExtents.y)
+            })
+            this.floor.area.on('interact', () =>
+            {
+                window.open(this.link.href, '_blank')
+            })
+
+            if(this.linkLabel)
+            {
+                this.floor.linkTexture = createTextTexture(
+                    [{ text: this.linkLabel, x: 16, y: 64, fontSize: 58, fontWeight: 900, color: '#ffffff', maxWidth: 480 }],
+                    { width: 512, height: 128 }
+                )
+                this.floor.linkTexture.magFilter = THREE.NearestFilter
+                this.floor.linkTexture.minFilter = THREE.LinearFilter
+
+                this.floor.areaLabel = new THREE.Mesh(
+                    new THREE.PlaneGeometry(2, 0.5),
+                    new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false, color: 0xffffff, alphaMap: this.floor.linkTexture })
+                )
+            }
+            else
+            {
+                this.floor.areaLabel = this.meshes.areaLabel.clone()
+            }
+
+            this.floor.areaLabel.position.x = this.labelPosition.x
+            this.floor.areaLabel.position.y = y
+            this.floor.areaLabel.position.z = 0.001
+            this.floor.areaLabel.matrixAutoUpdate = false
+            this.floor.areaLabel.updateMatrix()
+            this.floor.container.add(this.floor.areaLabel)
         }
     }
 }

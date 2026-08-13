@@ -202,10 +202,15 @@ export default class ProjectsSection
                 name: _project.name,
                 imageSources,
                 floorTexture,
-                // {href} when there's a real destination, else null — Project.js
-                // shows the "OPEN" pad only in the first case, a plain `status`
-                // label in the second, and nothing at all if both are empty
+                // {href} when there's a real destination, else null. `status`
+                // is independent of it now — Project.js can render either,
+                // both stacked (a status plus a link, e.g. Mood: sold to one
+                // venue, but worth visiting), or neither.
                 link: _project.link ? { href: _project.link } : null,
+                // Custom text for the link pad ("CHECK OUT THE STORE") in
+                // place of the default baked "OPEN" texture. Ignored if there
+                // is no link.
+                linkLabel: _project.linkLabel || null,
                 status: _project.status || null,
                 labelPosition: { x: - 4.8, y: - 3 },
                 labelHalfExtents: { x: 3.2, y: 1.5 }
