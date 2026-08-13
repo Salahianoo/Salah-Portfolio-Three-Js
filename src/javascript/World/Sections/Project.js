@@ -153,17 +153,21 @@ export default class Project
 
         // `status` and `link` are independent: a project can show either one,
         // both, or neither. When both are present (Mood: sold to a single
-        // venue, but worth visiting in person) they stack vertically, offset
-        // from the original single-label position so neither covers the
-        // other. With only one, that offset is zero and nothing changes from
-        // before.
+        // venue, but worth visiting in person) they stack vertically and sit
+        // on their own, closer anchor — the single-label anchor (-3) put a
+        // stacked pair 6+ units from the name/description text painted on
+        // the floor above them, reading as disconnected from the rest of the
+        // project. -1.4 brings them noticeably nearer without the pad
+        // reaching up into the boards. With only one of the two, nothing
+        // changes from before.
         const stacked = Boolean(this.link) && Boolean(this.status)
-        const stackOffset = 0.85
+        const stackedAnchorY = - 1.4
+        const stackGap = 0.6
 
         // Plain-text label, no Area — nothing to walk into or press ENTER on.
         if(this.status)
         {
-            const y = this.labelPosition.y + (stacked ? stackOffset : 0)
+            const y = stacked ? stackedAnchorY + stackGap : this.labelPosition.y
 
             // fontSize measured to fill the canvas the way the baked "OPEN"
             // texture does — at 46 the text sat small and high (y=34 on a
@@ -197,7 +201,7 @@ export default class Project
         // listing — leave it unset to keep the default "OPEN".
         if(this.link)
         {
-            const y = this.labelPosition.y - (stacked ? stackOffset : 0)
+            const y = stacked ? stackedAnchorY - stackGap : this.labelPosition.y
 
             this.floor.area = this.areas.add({
                 position: new THREE.Vector2(this.x + this.labelPosition.x, this.y + this.floor.y + y),
@@ -210,8 +214,16 @@ export default class Project
 
             if(this.linkLabel)
             {
+                // Measured (see measure2.js): at fontSize 58 — the size
+                // "status" uses — "CHECK OUT THE STORE" is 20 characters
+                // against status's 17, so the same maxWidth squeezes it
+                // harder (774px natural width down to 480 is a 62% scale,
+                // versus status's own 669px down to 480 at 72%) and it read
+                // visibly thinner at an identical nominal size. 50 brings its
+                // natural width to ~668px — matching status's squeeze ratio,
+                // so the two end up the same visual weight.
                 this.floor.linkTexture = createTextTexture(
-                    [{ text: this.linkLabel, x: 16, y: 64, fontSize: 58, fontWeight: 900, color: '#ffffff', maxWidth: 480 }],
+                    [{ text: this.linkLabel, x: 16, y: 64, fontSize: 50, fontWeight: 900, color: '#ffffff', maxWidth: 480 }],
                     { width: 512, height: 128 }
                 )
                 this.floor.linkTexture.magFilter = THREE.NearestFilter
