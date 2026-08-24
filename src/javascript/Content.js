@@ -50,6 +50,13 @@ export default {
      *     nothing to send anyone to (client/internal work)
      * There is no fallback link any more: a project with no `link` no longer
      * silently opens the GitHub profile.
+     *
+     * For something published in more than one place, use `links: [{ href,
+     * label, mark }]` instead of `link` — each entry becomes its own pad, laid
+     * out side by side across the floor. Two is the most that fits. `label`
+     * replaces the default "OPEN" text, and `mark` ('appStore' or 'playStore')
+     * stands that store's logo on the pad. The single `link` form takes the
+     * same two as `linkLabel` and `linkMark`.
      */
     projects: [
         {
@@ -83,7 +90,14 @@ export default {
         {
             name: 'LoopFruit',
             description: 'Fast, colourful memory game. 7 modes, daily challenge.',
-            link: 'https://play.google.com/store/apps/details?id=com.salah.loopfruit',
+            // Shipped on both stores, so it uses `links` rather than the single
+            // `link` field — two pads side by side instead of one "OPEN".
+            // `mark` stands the store's own logo on the pad beside the label;
+            // 'appStore' and 'playStore' are the two available.
+            links: [
+                { href: 'https://play.google.com/store/apps/details?id=com.salah.loopfruit', label: 'PLAY STORE', mark: 'playStore' },
+                { href: 'https://apps.apple.com/us/app/loopfruit/id6801919373', label: 'APP STORE', mark: 'appStore' }
+            ],
             images: ['/images/projects/loopfruit-1.png']
         },
         {

@@ -22,6 +22,11 @@ npm run build
 Name, tagline, bio, email, social links, achievements and projects all live in
 `src/javascript/Content.js`. Nothing else needs touching to update them.
 
+A project with one destination uses `link` (plus optional `linkLabel`); one
+published in more than one place uses `links: [{ href, label }]` instead and
+gets a floor pad per entry. Two pads is what the floor fits. Adding `mark`
+(`'appStore'` or `'playStore'`) stands that store's logo on the pad.
+
 ## License
 
 MIT — see [license.md](license.md).

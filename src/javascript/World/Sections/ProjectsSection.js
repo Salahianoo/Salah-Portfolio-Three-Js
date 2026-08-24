@@ -126,8 +126,22 @@ export default class ProjectsSection
             // in y rather than on it: with an odd number of projects the
             // centroid lands exactly on the middle project's board. The OPEN
             // pads reach to project.y - 6.5, so -9 clears those too.
-            const x = covered.reduce((_total, _project) => _total + _project.x, 0) / covered.length
+            let x = covered.reduce((_total, _project) => _total + _project.x, 0) / covered.length
             const y = covered.reduce((_total, _project) => _total + _project.y, 0) / covered.length - 9
+
+            // An odd-sized group centres on its middle project, which stands
+            // the post squarely in front of that project's floor pads — with
+            // MOBILE APPS at five projects, the pole was cutting across
+            // LoopFruit's PLAY STORE pad. Slide it into the gap between the
+            // middle project and the next one instead, so it always stands on
+            // empty ground between two of them.
+            const middle = _group.start + Math.floor(_group.count / 2)
+            const next = middle + 1
+
+            if(_group.count % 2 === 1 && next < _group.start + _group.count)
+            {
+                x += (this.positions[next] - this.positions[middle]) * 0.5
+            }
 
             const options = createSignpost(_group.text)
             options.offset.x += x
@@ -198,19 +212,29 @@ export default class ProjectsSection
                 { width: 1024, height: 512 }
             )
 
+            // Every destination a project has, normalised to one shape. A
+            // project may declare `links: [{ href, label, mark }]` for something
+            // on more than one store (LoopFruit), or the original single
+            // `link` / `linkLabel` / `linkMark` trio, or neither. `label` swaps
+            // the default baked "OPEN" texture for custom text, and `mark`
+            // stands a store logo on the pad beside it.
+            //
+            // `status` stays independent of all of it — Project.js can render
+            // either, both (a status plus a link, e.g. Mood: sold to one venue
+            // but worth visiting), or neither.
+            const links = _project.links && _project.links.length > 0
+                ? _project.links
+                    .filter((_link) => Boolean(_link.href))
+                    .map((_link) => ({ href: _link.href, label: _link.label || null, mark: _link.mark || null }))
+                : _project.link
+                    ? [{ href: _project.link, label: _project.linkLabel || null, mark: _project.linkMark || null }]
+                    : []
+
             return {
                 name: _project.name,
                 imageSources,
                 floorTexture,
-                // {href} when there's a real destination, else null. `status`
-                // is independent of it now — Project.js can render either,
-                // both stacked (a status plus a link, e.g. Mood: sold to one
-                // venue, but worth visiting), or neither.
-                link: _project.link ? { href: _project.link } : null,
-                // Custom text for the link pad ("CHECK OUT THE STORE") in
-                // place of the default baked "OPEN" texture. Ignored if there
-                // is no link.
-                linkLabel: _project.linkLabel || null,
+                links,
                 status: _project.status || null,
                 labelPosition: { x: - 4.8, y: - 3 },
                 labelHalfExtents: { x: 3.2, y: 1.5 }

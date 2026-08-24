@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js'
+import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js'
 import { font, capHeightRatio } from './BlockText.js'
 
 /**
@@ -542,4 +543,176 @@ export function createServerRack()
     prop.box('gray', [1.9, 1.4, 0.12], [0, 0, 3.46])
 
     return prop.toOptions(0, 0, 0, FACING)
+}
+
+/**
+ * Finishes a mark that stands on the ground rather than on a plinth.
+ *
+ * `Prop.toOptions` returns `mass: 0` because every plinth prop is static
+ * scenery. A mark standing in the open wants a shadow of its own and a bounce
+ * sound whatever its weight, and a mass if it is meant to be driven into —
+ * which the pad badges are, like the intro letters. Leave the mass at 0 for one
+ * that should stay put.
+ */
+function makeStanding(_options, _width, _height, _mass)
+{
+    _options.mass = _mass
+    _options.soundName = 'brick'
+    // Matches BlockText's ratio — the folio's blob shadows are a good deal
+    // wider than the object casting them
+    _options.shadow = { sizeX: _width * 1.6, sizeY: _width * 1.6, offsetZ: - _height * 0.5, alpha: 0.4 }
+
+    return _options
+}
+
+/**
+ * Stands an extruded-in-XY geometry up on the floor.
+ *
+ * Shapes in here are authored y-up in the XY plane and extruded along +Z, the
+ * same convention BlockText uses. A quarter turn on X puts their height on Z
+ * and turns the extruded face toward -Y, which is the side `FACING` then
+ * swings around to the camera. The geometry is centred on its own origin so
+ * the mesh, the physics box and the shadow all share one pivot.
+ *
+ * @returns the world-space [width, thickness, height] of the result
+ */
+function standUp(_geometry, _height, _yDown = false)
+{
+    _geometry.computeBoundingBox()
+
+    const authored = _geometry.boundingBox
+    const scale = _height / (authored.max.y - authored.min.y)
+
+    // Depth is left alone — it is already specified in world units
+    _geometry.scale(scale, scale, 1)
+    // Artwork taken from an SVG is authored y-down, so it stands up through the
+    // opposite quarter turn. Turning it rather than mirroring it matters: a
+    // negative scale would flip the winding and leave every face inside out.
+    _geometry.rotateX(_yDown ? - Math.PI * 0.5 : Math.PI * 0.5)
+    _geometry.computeBoundingBox()
+
+    const box = _geometry.boundingBox
+    _geometry.translate(
+        - (box.min.x + box.max.x) * 0.5,
+        - (box.min.y + box.max.y) * 0.5,
+        - (box.min.z + box.max.z) * 0.5
+    )
+
+    return [box.max.x - box.min.x, box.max.y - box.min.y, box.max.z - box.min.z]
+}
+
+// How thick a store mark stands relative to its height — measured at 2.2 units
+// tall, where a depth of 0.42 looked right.
+//
+// It has to scale with the mark rather than be fixed: a flat 0.42 on a 1.5-tall
+// pad badge is a third of its height, and comes out as a lump of shaded side
+// faces rather than a logo.
+const DEPTH_RATIO = 0.42 / 2.2
+
+/**
+ * The Apple mark, for badging a project's App Store pad.
+ *
+ * Taken as SVG path data and extruded, rather than drawn from bezier curves by
+ * hand. Hand-authoring it was the first attempt and it was not close enough:
+ * the bite kept cutting into the right shoulder, so the lobe above it came out
+ * as a thin horn instead of a round one, and the notch between the two humps
+ * read as a deep V rather than a shallow dip.
+ *
+ * Body and leaf are kept as two separate <path> elements on purpose. As
+ * subpaths of one path they are subject to the fill rule, and whether the leaf
+ * came back as its own shape or as a hole in the body would depend on it.
+ */
+const APPLE_BODY = 'M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09z'
+const APPLE_LEAF = 'M15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701'
+
+export function createAppStoreMark(_height = 2.2, _options = {})
+{
+    const prop = new Prop()
+    const depth = _options.depth ?? _height * DEPTH_RATIO
+
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="${APPLE_BODY}"/><path d="${APPLE_LEAF}"/></svg>`
+    const shapes = new SVGLoader().parse(svg).paths.flatMap((_path) => SVGLoader.createShapes(_path))
+
+    const geometry = new THREE.ExtrudeGeometry(shapes, { depth, bevelEnabled: false })
+    const [width, thickness, height] = standUp(geometry, _height, true)
+
+    prop.custom('white', geometry)
+
+    const collider = new THREE.Object3D()
+    collider.name = 'cube'
+    collider.scale.set(width, thickness, height)
+    prop.collision.add(collider)
+
+    return makeStanding(prop.toOptions(0, 0, height * 0.5, FACING), width, height, _options.mass ?? 0)
+}
+
+/**
+ * The Google Play mark, for badging a project's Play Store pad.
+ *
+ * Four triangles meeting at one interior point: the outer corners are the top
+ * and bottom of the left edge, the midpoint between them, and the tip on the
+ * right. Every facet is its own mesh because the shade parser assigns a matcap
+ * per mesh name, which is what makes the four colours possible without a
+ * single texture.
+ */
+export function createPlayStoreMark(_height = 2.2, _options = {})
+{
+    const prop = new Prop()
+    const depth = _options.depth ?? _height * DEPTH_RATIO
+    const width = _height * 0.86
+
+    // Green reads at the top, blue down the left edge, yellow along the top of
+    // the point and red underneath it. Swap these four names to re-order the
+    // facets — nothing else depends on them.
+    const shades = { topLeft: 'green', bottomLeft: 'blue', topRight: 'yellow', bottomRight: 'red' }
+
+    // Centred on the origin so the mark spins about its middle when hit
+    const top = [- width * 0.5, _height * 0.5]
+    const bottom = [- width * 0.5, - _height * 0.5]
+    const hinge = [- width * 0.5, 0]
+    const tip = [width * 0.5, 0]
+    // Where the four facets meet, a little over a third of the way to the tip
+    const centre = [- width * 0.5 + width * 0.38, 0]
+
+    const facets = [
+        [shades.topLeft, top, hinge, centre],
+        [shades.bottomLeft, hinge, bottom, centre],
+        [shades.bottomRight, bottom, tip, centre],
+        [shades.topRight, tip, top, centre]
+    ]
+
+    // Every facet is standing up by the same transform, so they stay aligned
+    for(const [_shade, _a, _b, _c] of facets)
+    {
+        const shape = new THREE.Shape()
+        shape.moveTo(..._a)
+        shape.lineTo(..._b)
+        shape.lineTo(..._c)
+        shape.closePath()
+
+        const geometry = new THREE.ExtrudeGeometry(shape, { depth, bevelEnabled: false })
+
+        // Authored already at final world size, so there is nothing to scale —
+        // just stand it up and centre the extrusion on the mark's own plane
+        geometry.rotateX(Math.PI * 0.5)
+        geometry.translate(0, depth * 0.5, 0)
+
+        prop.custom(_shade, geometry)
+    }
+
+    const collider = new THREE.Object3D()
+    collider.name = 'cube'
+    collider.scale.set(width, depth, _height)
+    prop.collision.add(collider)
+
+    return makeStanding(prop.toOptions(0, 0, _height * 0.5, FACING), width, _height, _options.mass ?? 0)
+}
+
+/**
+ * The store marks by name, so a project can build one from the `mark` string on
+ * a link in Content.js without knowing which function draws it.
+ */
+export const storeMarks = {
+    appStore: createAppStoreMark,
+    playStore: createPlayStoreMark
 }

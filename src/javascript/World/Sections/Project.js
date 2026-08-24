@@ -1,7 +1,8 @@
 import * as THREE from 'three'
 
 import ProjectBoardMaterial from '../../Materials/ProjectBoard.js'
-import { createTextTexture } from '../../Utils/TextTexture.js'
+import { createTextTexture, fitFontSize } from '../../Utils/TextTexture.js'
+import { storeMarks } from '../../Utils/Props.js'
 import gsap from 'gsap'
 
 export default class Project
@@ -22,12 +23,12 @@ export default class Project
         this.y = _options.y
         this.imageSources = _options.imageSources
         this.floorTexture = _options.floorTexture
-        // {href} when the project has somewhere real to send people, else null
-        this.link = _options.link
-        // Custom text on the link pad in place of the default "OPEN"
-        this.linkLabel = _options.linkLabel
-        // A plain-text floor label ("COMING SOON"...). Independent of `link` —
-        // may appear alone, alongside a link (stacked), or not at all
+        // Every destination this project has, as [{ href, label }]. Empty when
+        // there is nowhere real to send people. `label` swaps the default
+        // "OPEN" text on that pad.
+        this.links = _options.links || []
+        // A plain-text floor label ("COMING SOON"...). Independent of `links` —
+        // may appear alone, alongside a single link (stacked), or not at all
         this.status = _options.status
         this.labelPosition = _options.labelPosition
         this.labelHalfExtents = _options.labelHalfExtents
@@ -151,7 +152,7 @@ export default class Project
         this.floor.mesh.matrixAutoUpdate = false
         this.floor.container.add(this.floor.mesh)
 
-        // `status` and `link` are independent: a project can show either one,
+        // `status` and `links` are independent: a project can show either one,
         // both, or neither. When both are present (Mood: sold to a single
         // venue, but worth visiting in person) they stack vertically and sit
         // on their own, closer anchor — the single-label anchor (-3) put a
@@ -160,7 +161,7 @@ export default class Project
         // project. -1.4 brings them noticeably nearer without the pad
         // reaching up into the boards. With only one of the two, nothing
         // changes from before.
-        const stacked = Boolean(this.link) && Boolean(this.status)
+        const stacked = this.links.length === 1 && Boolean(this.status)
         const stackedAnchorY = - 1.4
         const stackGap = 0.6
 
@@ -195,56 +196,105 @@ export default class Project
             this.floor.container.add(this.floor.statusLabel)
         }
 
-        // A real destination: the clickable pad. `linkLabel` swaps the baked
+        // Real destinations: one clickable pad each. A `label` swaps the baked
         // "OPEN" texture for custom generated text — e.g. Mood's "CHECK OUT
         // THE STORE", pointing at the physical venue rather than an app
-        // listing — leave it unset to keep the default "OPEN".
-        if(this.link)
+        // listing, or LoopFruit's two store names.
+        //
+        // Several pads spread along x rather than stacking in y: the areas are
+        // 3.2 half-extents wide against a 16-wide floor, so two of them sit at
+        // -4.8 and +4.8 and exactly fill it without touching. A third would not
+        // fit, and nothing needs one.
+        this.floor.links = []
+
+        // Size, placement and weight of the optional store badge on a pad.
+        // The mass matches the intro letters, which are the same kind of
+        // object at much the same size.
+        this.marks = { height: 1.5, offsetY: 1.1, mass: 1.5 }
+
+        const spread = this.links.length > 1
+        const step = Math.abs(this.labelPosition.x) * 2
+
+        this.links.forEach((_link, _index) =>
         {
+            const x = spread
+                ? this.labelPosition.x + _index * step
+                : this.labelPosition.x
             const y = stacked ? stackedAnchorY - stackGap : this.labelPosition.y
 
-            this.floor.area = this.areas.add({
-                position: new THREE.Vector2(this.x + this.labelPosition.x, this.y + this.floor.y + y),
+            const item = {}
+
+            item.area = this.areas.add({
+                position: new THREE.Vector2(this.x + x, this.y + this.floor.y + y),
                 halfExtents: new THREE.Vector2(this.labelHalfExtents.x, this.labelHalfExtents.y)
             })
-            this.floor.area.on('interact', () =>
+            item.area.on('interact', () =>
             {
-                window.open(this.link.href, '_blank')
+                window.open(_link.href, '_blank')
             })
 
-            if(this.linkLabel)
+            if(_link.label)
             {
-                // Measured (see measure2.js): at fontSize 58 — the size
-                // "status" uses — "CHECK OUT THE STORE" is 20 characters
-                // against status's 17, so the same maxWidth squeezes it
-                // harder (774px natural width down to 480 is a 62% scale,
-                // versus status's own 669px down to 480 at 72%) and it read
-                // visibly thinner at an identical nominal size. 50 brings its
-                // natural width to ~668px — matching status's squeeze ratio,
-                // so the two end up the same visual weight.
-                this.floor.linkTexture = createTextTexture(
-                    [{ text: this.linkLabel, x: 16, y: 64, fontSize: 50, fontWeight: 900, color: '#ffffff', maxWidth: 480 }],
+                // Sized to fill the canvas rather than set to a fixed number,
+                // because that is what decides how big the lettering reads
+                // once the texture is on the pad.
+                //
+                // A long label such as Mood's "CHECK OUT THE STORE" falls
+                // under the 50 floor, so it keeps the size it always had and
+                // `maxWidth` condenses it to the full width — matching the
+                // squeeze on "COMING SOON" beside it, which is what that size
+                // was originally measured for. A short one like "PLAY STORE"
+                // has slack instead: at 50 it covered barely half the canvas
+                // and read visibly weaker than the baked "OPEN" texture, so it
+                // is scaled up until it fills the same width.
+                item.texture = createTextTexture(
+                    [{ text: _link.label, x: 16, y: 64, fontSize: fitFontSize(_link.label), fontWeight: 900, color: '#ffffff', maxWidth: 480 }],
                     { width: 512, height: 128 }
                 )
-                this.floor.linkTexture.magFilter = THREE.NearestFilter
-                this.floor.linkTexture.minFilter = THREE.LinearFilter
+                item.texture.magFilter = THREE.NearestFilter
+                item.texture.minFilter = THREE.LinearFilter
 
-                this.floor.areaLabel = new THREE.Mesh(
+                item.labelMesh = new THREE.Mesh(
                     new THREE.PlaneGeometry(2, 0.5),
-                    new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false, color: 0xffffff, alphaMap: this.floor.linkTexture })
+                    new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false, color: 0xffffff, alphaMap: item.texture })
                 )
             }
             else
             {
-                this.floor.areaLabel = this.meshes.areaLabel.clone()
+                item.labelMesh = this.meshes.areaLabel.clone()
             }
 
-            this.floor.areaLabel.position.x = this.labelPosition.x
-            this.floor.areaLabel.position.y = y
-            this.floor.areaLabel.position.z = 0.001
-            this.floor.areaLabel.matrixAutoUpdate = false
-            this.floor.areaLabel.updateMatrix()
-            this.floor.container.add(this.floor.areaLabel)
-        }
+            item.labelMesh.position.x = x
+            item.labelMesh.position.y = y
+            item.labelMesh.position.z = 0.001
+            item.labelMesh.matrixAutoUpdate = false
+            item.labelMesh.updateMatrix()
+            this.floor.container.add(item.labelMesh)
+
+            // An optional badge standing on the pad: the store's own logo,
+            // extruded from Utils/Props.js.
+            //
+            // It stands a unit behind the lettering rather than on it. The
+            // camera hides the ground back and to the left of anything solid,
+            // so a mark placed in front would cover its own label, and one
+            // placed on it would cover the text outright.
+            //
+            // Knockable, like the intro letters. The pad keeps its painted
+            // label either way, so shoving the badge off it loses nothing —
+            // the text on the floor is what actually names the button.
+            const build = storeMarks[_link.mark]
+
+            if(build)
+            {
+                const markOptions = build(this.marks.height, { mass: this.marks.mass })
+                markOptions.offset.x += this.x + x
+                markOptions.offset.y += this.y + this.floor.y + y + this.marks.offsetY
+
+                this.objects.add(markOptions)
+                item.mark = markOptions
+            }
+
+            this.floor.links.push(item)
+        })
     }
 }
