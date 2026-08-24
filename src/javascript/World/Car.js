@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 import CANNON from 'cannon'
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js'
+import { createLancerModels } from '../Utils/Car/Lancer.js'
 
 export default class Car
 {
@@ -56,16 +57,20 @@ export default class Car
             this.models.wheel = this.resources.items.carCyberTruckWheel
         }
 
-        // Default
+        // Default — a 2004 Lancer built from primitives at runtime rather than
+        // loaded from GLB (see Utils/Car/Lancer.js). It is authored to the same
+        // chassis frame and wheel positions the physics rig already uses, so
+        // nothing about the driving changes. The original folio car's models
+        // are still in static/models/car/default if it is ever wanted back.
         else
         {
-            this.models.chassis = this.resources.items.carDefaultChassis
-            this.models.antena = this.resources.items.carDefaultAntena
-            // this.models.bunnyEarLeft = this.resources.items.carDefaultBunnyEarLeft
-            // this.models.bunnyEarRight = this.resources.items.carDefaultBunnyEarRight
-            this.models.backLightsBrake = this.resources.items.carDefaultBackLightsBrake
-            this.models.backLightsReverse = this.resources.items.carDefaultBackLightsReverse
-            this.models.wheel = this.resources.items.carDefaultWheel
+            const lancer = createLancerModels()
+
+            this.models.chassis = lancer.chassis
+            this.models.antena = lancer.antena
+            this.models.backLightsBrake = lancer.backLightsBrake
+            this.models.backLightsReverse = lancer.backLightsReverse
+            this.models.wheel = lancer.wheel
         }
     }
 

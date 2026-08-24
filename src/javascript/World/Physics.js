@@ -123,8 +123,14 @@ export default class Physics
         this.car.options.chassisDepth = 2.03
         this.car.options.chassisOffset = new CANNON.Vec3(0, 0, 0.41)
         this.car.options.chassisMass = 40
-        this.car.options.wheelFrontOffsetDepth = 0.635
-        this.car.options.wheelBackOffsetDepth = - 0.475
+        // Centred wheelbase. The original folio car sat its wheels forward of
+        // the middle (0.635 / -0.475), which left a short nose and a long tail
+        // — fine for that shape, wrong for a saloon, and the body has to be
+        // drawn around wherever these land because the raycast vehicle places
+        // the wheel meshes itself. Symmetric also balances the load either
+        // side of the centre of mass instead of hanging it over the back axle.
+        this.car.options.wheelFrontOffsetDepth = 0.60
+        this.car.options.wheelBackOffsetDepth = - 0.60
         this.car.options.wheelOffsetWidth = 0.39
         this.car.options.wheelRadius = 0.25
         this.car.options.wheelHeight = 0.24

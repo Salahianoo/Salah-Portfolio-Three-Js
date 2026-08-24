@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 import FloorShadowMaterial from '../Materials/FloorShadow.js'
 import MatcapMaterial from '../Materials/Matcap.js'
+import { createMatcapTexture } from '../Utils/Matcap.js'
 
 export default class Materials
 {
@@ -55,6 +56,30 @@ export default class Materials
             uIndirectAnglePower: 1.0,
             uIndirectColor: null
         }
+
+        // Navy — the car's paint. Generated rather than loaded: every other
+        // shade has a PNG under static/models/matcaps, and this is the only
+        // colour one object needs, so it is drawn at runtime instead of
+        // committing another binary. See Utils/Matcap.js.
+        this.shades.items.navy = new MatcapMaterial()
+        this.shades.items.navy.name = 'shadeNavy'
+        this.shades.items.navy.uniforms.matcap.value = createMatcapTexture()
+        this.items.navy = this.shades.items.navy
+
+        // Glass — the car's windows. Reusing `black` put a near-white sheet on
+        // the windscreen: a matcap is sampled by the surface normal, and an
+        // upward-raked screen lands on the lit top of that texture. This one is
+        // dark wherever it is sampled, with the highlight kept tight.
+        this.shades.items.glass = new MatcapMaterial()
+        this.shades.items.glass.name = 'shadeGlass'
+        this.shades.items.glass.uniforms.matcap.value = createMatcapTexture({
+            shadow: '#05080e',
+            base: '#101a28',
+            light: '#27384c',
+            rim: '#4c6d92',
+            specular: '#d6e8ff'
+        })
+        this.items.glass = this.shades.items.glass
 
         // White
         this.shades.items.white = new MatcapMaterial()
