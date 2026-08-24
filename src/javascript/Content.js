@@ -84,7 +84,12 @@ export default {
             // Kept short on purpose — this renders as a single unwrapped line
             // on the floor beside the boards
             description: 'AI-powered bill splitting & money tracking.',
+            // Android only, so it keeps the single `link` form — `linkLabel`
+            // and `linkMark` are its one-destination equivalents of the
+            // `label` / `mark` pair LoopFruit sets per entry.
             link: 'https://play.google.com/store/apps/details?id=com.salah.qisma',
+            linkLabel: 'PLAY STORE',
+            linkMark: 'playStore',
             images: ['/images/projects/qisma-1.png']
         },
         {
@@ -114,8 +119,14 @@ export default {
             // (architecture, feature list, the overlay/rename problem it
             // solves) lives in `caseStudy` below.
             description: 'Arabic/RTL exam-paper library. Flutter app + React admin dashboard.',
-            link: '',
-            status: 'COMING SOON',
+            // Published on the App Store, iOS only for now. The "COMING SOON"
+            // status that used to stand here is gone: it would have stacked
+            // above a live APP STORE pad and contradicted it. Put it back if
+            // it should read as "Android coming soon" rather than as the app
+            // being unreleased.
+            link: 'https://apps.apple.com/us/app/khazna-exam-vault/id6802096231',
+            linkLabel: 'APP STORE',
+            linkMark: 'appStore',
             images: ['/images/projects/exam-vault-portfolio.png'],
             // Not rendered anywhere yet — kept for the planned per-project
             // pages, same as Mood's. Nothing reads this field today.
