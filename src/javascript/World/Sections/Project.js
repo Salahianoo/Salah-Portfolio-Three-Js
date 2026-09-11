@@ -161,7 +161,16 @@ export default class Project
         // project. -1.4 brings them noticeably nearer without the pad
         // reaching up into the boards. With only one of the two, nothing
         // changes from before.
-        const stacked = this.links.length === 1 && Boolean(this.status)
+        //
+        // A badge is the exception. It stands on the pad and occupies exactly
+        // the ground a stacked status would be painted on, so a project with
+        // both puts the status in the slot a second pad would take instead —
+        // beside the pad rather than above it. Nothing needs this today (Exam
+        // Vault did while its Android build was on hold), but a badged pad and
+        // a status would otherwise be drawn on top of each other.
+        const badged = this.links.some((_link) => Boolean(_link.mark))
+        const stacked = this.links.length === 1 && Boolean(this.status) && !badged
+        const statusAside = this.links.length === 1 && Boolean(this.status) && badged
         const stackedAnchorY = - 1.4
         const stackGap = 0.6
 
@@ -169,6 +178,9 @@ export default class Project
         if(this.status)
         {
             const y = stacked ? stackedAnchorY + stackGap : this.labelPosition.y
+            // Mirrored onto the right-hand pad slot, which is free whenever
+            // there is only one link
+            const x = statusAside ? - this.labelPosition.x : this.labelPosition.x
 
             // fontSize measured to fill the canvas the way the baked "OPEN"
             // texture does — at 46 the text sat small and high (y=34 on a
@@ -190,7 +202,7 @@ export default class Project
                 new THREE.PlaneGeometry(2, 0.5),
                 new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false, color: 0xffffff, alphaMap: this.floor.statusTexture })
             )
-            this.floor.statusLabel.position.set(this.labelPosition.x, y, 0.001)
+            this.floor.statusLabel.position.set(x, y, 0.001)
             this.floor.statusLabel.matrixAutoUpdate = false
             this.floor.statusLabel.updateMatrix()
             this.floor.container.add(this.floor.statusLabel)
@@ -201,10 +213,14 @@ export default class Project
         // THE STORE", pointing at the physical venue rather than an app
         // listing, or LoopFruit's two store names.
         //
-        // Several pads spread along x rather than stacking in y: the areas are
-        // 3.2 half-extents wide against a 16-wide floor, so two of them sit at
-        // -4.8 and +4.8 and exactly fill it without touching. A third would not
-        // fit, and nothing needs one.
+        // Several pads spread along x rather than stacking in y, centred on the
+        // floor as a pair.
+        //
+        // `padSpread` is the distance between their centres. The areas are 3.2
+        // half-extents wide, so 6.4 is the point at which their frames touch;
+        // 7 leaves a deliberate hairline between them. They used to sit at
+        // -4.8 and +4.8, which filled the whole 16-wide floor and left each
+        // pad almost touching the neighbouring project's.
         this.floor.links = []
 
         // Size, placement and weight of the optional store badge on a pad.
@@ -213,12 +229,12 @@ export default class Project
         this.marks = { height: 1.5, offsetY: 1.1, mass: 1.5 }
 
         const spread = this.links.length > 1
-        const step = Math.abs(this.labelPosition.x) * 2
+        const padSpread = 7
 
         this.links.forEach((_link, _index) =>
         {
             const x = spread
-                ? this.labelPosition.x + _index * step
+                ? (_index - (this.links.length - 1) * 0.5) * padSpread
                 : this.labelPosition.x
             const y = stacked ? stackedAnchorY - stackGap : this.labelPosition.y
 

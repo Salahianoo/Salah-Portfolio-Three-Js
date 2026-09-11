@@ -36,7 +36,11 @@ export default class ProjectsSection
         // them runs from x + projectHalfWidth to x + interDistance -
         // projectHalfWidth, so interDistance has to stay above twice the half
         // width (12) or the connecting path inverts.
-        this.interDistance = 16
+        //
+        // The floor panel is 16 wide, so at 16 the panels abutted and a pad on
+        // one project sat right against its neighbour's. 20 leaves four units
+        // of clear ground between panels.
+        this.interDistance = 20
         // Tighter spacing used only between two projects in the same category
         // group (see setLayout) — 14 is the floor with a 2-unit safety margin
         // above the 12-unit limit above.
