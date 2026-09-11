@@ -53,12 +53,58 @@ export default {
      *
      * For something published in more than one place, use `links: [{ href,
      * label, mark }]` instead of `link` — each entry becomes its own pad, laid
-     * out side by side across the floor. Two is the most that fits. `label`
+     * out side by side across the floor, in the order listed — App Store
+     * first, then Google Play. Two is the most that fits. `label`
      * replaces the default "OPEN" text, and `mark` ('appStore' or 'playStore')
      * stands that store's logo on the pad. The single `link` form takes the
      * same two as `linkLabel` and `linkMark`.
      */
     projects: [
+        {
+            name: 'Qisma',
+            // Kept short on purpose — this renders as a single unwrapped line
+            // on the floor beside the boards
+            description: 'AI-powered bill splitting & money tracking.',
+            // On both stores now, so it takes the `links` form — one pad per
+            // entry, side by side, each badged with that store's own mark.
+            links: [
+                { href: 'https://apps.apple.com/us/app/%D9%82-%D8%B3-%D9%85%D8%A9-qisma/id6804869396', label: 'APP STORE', mark: 'appStore' },
+                { href: 'https://play.google.com/store/apps/details?id=com.salah.qisma', label: 'PLAY STORE', mark: 'playStore' }
+            ],
+            images: ['/images/projects/qisma-1.png']
+        },
+        {
+            name: 'Exam Vault',
+            // Trimmed hard from the written material: single unwrapped line on
+            // the floor, ~70 characters is the ceiling. The full write-up
+            // (architecture, feature list, the overlay/rename problem it
+            // solves) lives in `caseStudy` below.
+            description: 'Arabic/RTL exam-paper library. Flutter app + React admin dashboard.',
+            // Out on both stores now — the Android build that was on hold has
+            // shipped, so the "GOOGLE PLAY ON HOLD" status is gone and this
+            // takes the two-pad `links` form like Qisma and LoopFruit.
+            links: [
+                { href: 'https://apps.apple.com/us/app/khazna-exam-vault/id6802096231', label: 'APP STORE', mark: 'appStore' },
+                { href: 'https://play.google.com/store/apps/details?id=com.salah.examvault', label: 'PLAY STORE', mark: 'playStore' }
+            ],
+            images: ['/images/projects/exam-vault-portfolio.png'],
+            // Not rendered anywhere yet — kept for the planned per-project
+            // pages, same as Mood's. Nothing reads this field today.
+            caseStudy: 'Exam Vault (خزنة الامتحانات) is a two-part system for distributing past exam papers at Hashemite University. Students use a Flutter app built entirely in Arabic and right-to-left: they drill down from a section (compulsory, elective, remedial) to a subject to an exam type — midterm, final, screens, or suggested questions — and read the PDF in an embedded viewer or download it for offline use, with favourites and recently-viewed papers kept on the device and a global search that jumps straight to any subject. Cached lists render before the network responds, so the app never opens to a blank screen or a spinner. Staff use a React + TypeScript dashboard that writes everything the app reads: they upload PDFs by drag-and-drop and create or rename sections, subjects, and exam types on the fly, all of which appear in students\' hands without an app-store release. Writes are restricted to a named admin allowlist enforced by server-side security rules; reads stay public, because open access is the point of the product. Both apps talk to the same Firebase project (Auth, Firestore, Storage, Hosting) — no backend service to deploy, patch, or pay for. The interesting problem: the mobile app ships with its subject lists compiled into the binary, so anything an admin adds has to reach students who are still running an older build — solved by layering the admin\'s data as Firestore overlays on top of the app\'s built-in defaults, with the built-ins acting as the offline fallback. The subtler problem was renaming: every uploaded file is keyed by its subject name, so a naive rename would orphan hundreds of PDFs, or worse, silently empty the subject for every user who hadn\'t updated yet — solved by separating each record\'s immutable storage key from its display label, so renaming changes only what\'s shown, files never move, and older builds keep working untouched.'
+        },
+        {
+            name: 'LoopFruit',
+            description: 'Fast, colourful memory game. 7 modes, daily challenge.',
+            // Shipped on both stores, so it uses `links` rather than the single
+            // `link` field — two pads side by side instead of one "OPEN".
+            // `mark` stands the store's own logo on the pad beside the label;
+            // 'appStore' and 'playStore' are the two available.
+            links: [
+                { href: 'https://apps.apple.com/us/app/loopfruit/id6801919373', label: 'APP STORE', mark: 'appStore' },
+                { href: 'https://play.google.com/store/apps/details?id=com.salah.loopfruit', label: 'PLAY STORE', mark: 'playStore' }
+            ],
+            images: ['/images/projects/loopfruit-1.png']
+        },
         {
             name: 'Mood',
             // Trimmed hard from the written subtitle: this renders as a single
@@ -80,57 +126,11 @@ export default {
             caseStudy: 'Mood is a full offline operations system for a PlayStation gaming lounge and its attached coffee shop, built solo end-to-end — product decisions, UI, and the offline data layer. Staff run the whole venue from one Android tablet with no internet dependency: PS5 rooms bill by the second from a persisted timestamp (never a fragile in-memory timer, so a killed app never loses time), a "waiting for a friend" mode lets a table open and sell drinks before billing starts, and the café POS is stock-linked — selling an item decrements inventory automatically and reverses cleanly if removed. The shift-accounting layer goes beyond "cash collected": every product tracks cost price against sale price, so the end-of-shift summary separates revenue from actual profit, with a running log of non-resale operational expenses (supplies) netted in too. Every closed bill gets a permanent sequential number, shared across both floors, and stays in a 48-hour lookback archive after its shift closes — with confirm-gated delete for corrections. Built in Flutter with Riverpod for state and Hive for fully offline, on-device persistence — no backend, no signal required on site.'
         },
         {
-            name: 'Qisma',
-            // Kept short on purpose — this renders as a single unwrapped line
-            // on the floor beside the boards
-            description: 'AI-powered bill splitting & money tracking.',
-            // Android only, so it keeps the single `link` form — `linkLabel`
-            // and `linkMark` are its one-destination equivalents of the
-            // `label` / `mark` pair LoopFruit sets per entry.
-            link: 'https://play.google.com/store/apps/details?id=com.salah.qisma',
-            linkLabel: 'PLAY STORE',
-            linkMark: 'playStore',
-            images: ['/images/projects/qisma-1.png']
-        },
-        {
-            name: 'LoopFruit',
-            description: 'Fast, colourful memory game. 7 modes, daily challenge.',
-            // Shipped on both stores, so it uses `links` rather than the single
-            // `link` field — two pads side by side instead of one "OPEN".
-            // `mark` stands the store's own logo on the pad beside the label;
-            // 'appStore' and 'playStore' are the two available.
-            links: [
-                { href: 'https://play.google.com/store/apps/details?id=com.salah.loopfruit', label: 'PLAY STORE', mark: 'playStore' },
-                { href: 'https://apps.apple.com/us/app/loopfruit/id6801919373', label: 'APP STORE', mark: 'appStore' }
-            ],
-            images: ['/images/projects/loopfruit-1.png']
-        },
-        {
             name: 'Adatuna',
             description: 'Arab heritage, curated. Arabic-first, RTL native.',
             link: '',
             status: 'COMING SOON',
             images: ['/images/projects/adatuna-1.png']
-        },
-        {
-            name: 'Exam Vault',
-            // Trimmed hard from the written material: single unwrapped line on
-            // the floor, ~70 characters is the ceiling. The full write-up
-            // (architecture, feature list, the overlay/rename problem it
-            // solves) lives in `caseStudy` below.
-            description: 'Arabic/RTL exam-paper library. Flutter app + React admin dashboard.',
-            // Published on the App Store, iOS only for now. The "COMING SOON"
-            // status that used to stand here is gone: it would have stacked
-            // above a live APP STORE pad and contradicted it. Put it back if
-            // it should read as "Android coming soon" rather than as the app
-            // being unreleased.
-            link: 'https://apps.apple.com/us/app/khazna-exam-vault/id6802096231',
-            linkLabel: 'APP STORE',
-            linkMark: 'appStore',
-            images: ['/images/projects/exam-vault-portfolio.png'],
-            // Not rendered anywhere yet — kept for the planned per-project
-            // pages, same as Mood's. Nothing reads this field today.
-            caseStudy: 'Exam Vault (خزنة الامتحانات) is a two-part system for distributing past exam papers at Hashemite University. Students use a Flutter app built entirely in Arabic and right-to-left: they drill down from a section (compulsory, elective, remedial) to a subject to an exam type — midterm, final, screens, or suggested questions — and read the PDF in an embedded viewer or download it for offline use, with favourites and recently-viewed papers kept on the device and a global search that jumps straight to any subject. Cached lists render before the network responds, so the app never opens to a blank screen or a spinner. Staff use a React + TypeScript dashboard that writes everything the app reads: they upload PDFs by drag-and-drop and create or rename sections, subjects, and exam types on the fly, all of which appear in students\' hands without an app-store release. Writes are restricted to a named admin allowlist enforced by server-side security rules; reads stay public, because open access is the point of the product. Both apps talk to the same Firebase project (Auth, Firestore, Storage, Hosting) — no backend service to deploy, patch, or pay for. The interesting problem: the mobile app ships with its subject lists compiled into the binary, so anything an admin adds has to reach students who are still running an older build — solved by layering the admin\'s data as Firestore overlays on top of the app\'s built-in defaults, with the built-ins acting as the offline fallback. The subtler problem was renaming: every uploaded file is keyed by its subject name, so a naive rename would orphan hundreds of PDFs, or worse, silently empty the subject for every user who hadn\'t updated yet — solved by separating each record\'s immutable storage key from its display label, so renaming changes only what\'s shown, files never move, and older builds keep working untouched.'
         },
         {
             // No link and no status: client/internal work with nothing public
@@ -157,11 +157,5 @@ export default {
             images: ['/images/projects/hr_hero_1600x930.png']
         }
 
-        // Placeholder removed — was 'Web Platform', a generic stand-in with no
-        // real screenshots or link. Re-add a real entry here (with an `images`
-        // array) for an actual web project; copy the shape of the entries
-        // above. Leaving this out changes nothing else: the category signposts
-        // in ProjectsSection.js only cover indices 0-2 and 3-5, so removing the
-        // trailing 7th entry doesn't shift either group.
     ]
 }
