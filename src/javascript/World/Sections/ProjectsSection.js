@@ -275,12 +275,32 @@ export default class ProjectsSection
         // the old `list.length * (interDistance / 2)` — that assumed every
         // gap was the same size, which stopped being true once category
         // groups could use tightInterDistance.
+        //
+        // The edges are set explicitly rather than as a centre plus half the
+        // span. That version shifted the whole zone 12 units left of the span
+        // it measured, so its right edge stopped 12 short of the last project
+        // — Odoo HR sat just outside it, and Aiodyx, once added, sat entirely
+        // outside: driving up to it swung the camera back to the default angle
+        // and brought the edge blur back, so its boards were seen differently
+        // from every other project's.
+        //
+        // The left edge stays exactly where it was, since that is where the
+        // road in from the crossroads enters. The right edge now clears the
+        // last project's whole row of boards, however many it has.
         const lastX = this.positions[this.positions.length - 1]
-        const totalWidth = (lastX - this.x) / 2
+        const last = this.list[this.list.length - 1]
+        // Mirrors Project.boards.xInter and the board plane width; the projects
+        // are not built yet when the zone is sized, so they cannot be read back
+        const boardSpacing = 5
+        const boardHalfWidth = 4.671 * 0.5
+        const lastBoardsReach = (last.imageSources.length - 1) * boardSpacing * 0.5 + boardHalfWidth
+
+        const left = this.x - this.projectHalfWidth - 6
+        const right = lastX + lastBoardsReach + this.projectHalfWidth
 
         const zone = this.zones.add({
-            position: { x: this.x + totalWidth - this.projectHalfWidth - 6, y: this.y },
-            halfExtents: { x: totalWidth, y: 12 },
+            position: { x: (left + right) * 0.5, y: this.y },
+            halfExtents: { x: (right - left) * 0.5, y: 12 },
             data: { cameraAngle: 'projects' }
         })
 
