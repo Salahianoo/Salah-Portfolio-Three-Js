@@ -133,6 +133,20 @@ export default {
             images: ['/images/projects/adatuna-1.png']
         },
         {
+            name: 'Aiodyx',
+            // Longer than the other captions, so it wraps onto two lines on
+            // the floor rather than being condensed to fit one (see wrapLines
+            // in Utils/TextTexture.js).
+            description: 'Scroll-driven 3D storytelling for an ERP brand, bilingual English and Arabic, built with Next.js.',
+            link: 'https://aiodyx.com/ar/',
+            images: [
+                '/images/projects/aiodyx-portfolio.png',
+                '/images/projects/aiodyx-portfolio-bilingual.png',
+                '/images/projects/aiodyx-portfolio-mobile.png',
+                '/images/projects/aiodyx-portfolio-modules.png'
+            ]
+        },
+        {
             // No link and no status: client/internal work with nothing public
             // to send a visitor to, so no floor pad at all
             name: 'Odoo ERP',

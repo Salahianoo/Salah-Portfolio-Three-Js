@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 import Project from './Project'
 import gsap from 'gsap'
-import { createTextTexture, createTextImageDataURL } from '../../Utils/TextTexture.js'
+import { createTextTexture, createTextImageDataURL, wrapLines } from '../../Utils/TextTexture.js'
 import { createSignpost } from '../../Utils/Props.js'
 import Content from '../../Content.js'
 
@@ -84,7 +84,8 @@ export default class ProjectsSection
         // cluster tighter — MOBILE APPS stays at the original spacing.
         this.categoryGroups = [
             { text: 'MOBILE APPS', start: 0, count: 5 },
-            { text: 'ERP SYSTEMS', start: 5, count: 3, tight: true }
+            { text: 'WEB DEVELOPMENT', start: 5, count: 1 },
+            { text: 'ERP SYSTEMS', start: 6, count: 3, tight: true }
         ]
 
         const inGroup = (_index, _group) => _index >= _group.start && _index < _group.start + _group.count
@@ -145,6 +146,20 @@ export default class ProjectsSection
             if(_group.count % 2 === 1 && next < _group.start + _group.count)
             {
                 x += (this.positions[next] - this.positions[middle]) * 0.5
+            }
+
+            // A group of one has no neighbour inside it to slide toward, so the
+            // rule above leaves the post standing on that project's pad — which
+            // is exactly where WEB DEVELOPMENT landed, covering Aiodyx's OPEN.
+            // It goes in the gap before the project instead. The board's arrow
+            // points toward +x, so from there it points across at the project
+            // it names.
+            else if(_group.count === 1)
+            {
+                const previous = this.positions[_group.start - 1]
+                x = typeof previous === 'undefined'
+                    ? x - this.interDistance * 0.5
+                    : (previous + this.positions[_group.start]) * 0.5
             }
 
             const options = createSignpost(_group.text)
@@ -208,10 +223,18 @@ export default class ProjectsSection
             // the x inset. It is a guard, not the layout: descriptions are meant
             // to be short enough not to reach it, but an over-long one now
             // condenses to fit instead of silently running off the label.
+            //
+            // A caption too long for one line wraps onto a second, 30px below
+            // (see wrapLines). There is room for it: the nearest thing painted
+            // underneath is a stacked status label, down at canvas y ~307.
+            const descriptionLines = wrapLines(_project.description, { maxWidth: 790, fontSize: 22, fontWeight: 400 })
+
             const floorTexture = createTextTexture(
                 [
                     { text: _project.name, x: 210, y: 60, fontSize: 44, fontWeight: 900, maxWidth: 790 },
-                    { text: _project.description, x: 214, y: 120, fontSize: 22, fontWeight: 400, color: '#999999', maxWidth: 790 }
+                    ...descriptionLines.map((_line, _index) => (
+                        { text: _line, x: 214, y: 120 + _index * 30, fontSize: 22, fontWeight: 400, color: '#999999', maxWidth: 790 }
+                    ))
                 ],
                 { width: 1024, height: 512 }
             )

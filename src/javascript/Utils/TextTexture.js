@@ -46,6 +46,55 @@ function drawTextCanvas(lines, _options = {})
 }
 
 /**
+ * Splits a caption onto two lines when it would not fit on one.
+ *
+ * `maxWidth` on a line condenses the glyphs rather than clipping them, which
+ * is the right guard for a string that is only just too long. For one that is
+ * a good deal too long it squashes the lettering visibly narrower than every
+ * caption around it, so past the width the text is broken in two instead.
+ *
+ * The break goes wherever the longer of the two lines is shortest, so the pair
+ * comes out balanced rather than one full line and a stub — with a preference
+ * for breaking after a comma when that is nearly as balanced, so the lines
+ * split on a phrase instead of mid-thought.
+ */
+export function wrapLines(_text, _options = {})
+{
+    const options = { maxWidth: 790, fontSize: 22, fontWeight: 400, fontFamily: 'Arial, sans-serif', ..._options }
+
+    const context = document.createElement('canvas').getContext('2d')
+    context.font = `${options.fontWeight} ${options.fontSize}px ${options.fontFamily}`
+    const measure = (_string) => context.measureText(_string).width
+
+    if(measure(_text) <= options.maxWidth)
+    {
+        return [_text]
+    }
+
+    const words = _text.split(' ')
+    const candidates = []
+
+    for(let i = 1; i < words.length; i++)
+    {
+        const first = words.slice(0, i).join(' ')
+        const second = words.slice(i).join(' ')
+
+        candidates.push({
+            lines: [first, second],
+            widest: Math.max(measure(first), measure(second)),
+            afterComma: first.endsWith(',')
+        })
+    }
+
+    const balanced = candidates.reduce((_best, _candidate) => _candidate.widest < _best.widest ? _candidate : _best)
+    const comma = candidates
+        .filter((_candidate) => _candidate.afterComma && _candidate.widest <= balanced.widest * 1.1)
+        .sort((_a, _b) => _a.widest - _b.widest)[0]
+
+    return (comma || balanced).lines
+}
+
+/**
  * Picks the font size that makes a single line fill `maxWidth`.
  *
  * The labels in here are drawn on a fixed canvas and then mapped onto a plane,
