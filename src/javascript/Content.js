@@ -71,7 +71,7 @@ export default {
                 { href: 'https://apps.apple.com/us/app/%D9%82-%D8%B3-%D9%85%D8%A9-qisma/id6804869396', label: 'APP STORE', mark: 'appStore' },
                 { href: 'https://play.google.com/store/apps/details?id=com.salah.qisma', label: 'PLAY STORE', mark: 'playStore' }
             ],
-            images: ['/images/projects/qisma-1.png']
+            images: ['/images/projects/qisma-hero.png', '/images/projects/qisma-1.png']
         },
         {
             name: 'Exam Vault',
@@ -87,7 +87,7 @@ export default {
                 { href: 'https://apps.apple.com/us/app/khazna-exam-vault/id6802096231', label: 'APP STORE', mark: 'appStore' },
                 { href: 'https://play.google.com/store/apps/details?id=com.salah.examvault', label: 'PLAY STORE', mark: 'playStore' }
             ],
-            images: ['/images/projects/exam-vault-portfolio.png'],
+            images: ['/images/projects/exam-vault-hero.png', '/images/projects/exam-vault-portfolio.png'],
             // Not rendered anywhere yet — kept for the planned per-project
             // pages, same as Mood's. Nothing reads this field today.
             caseStudy: 'Exam Vault (خزنة الامتحانات) is a two-part system for distributing past exam papers at Hashemite University. Students use a Flutter app built entirely in Arabic and right-to-left: they drill down from a section (compulsory, elective, remedial) to a subject to an exam type — midterm, final, screens, or suggested questions — and read the PDF in an embedded viewer or download it for offline use, with favourites and recently-viewed papers kept on the device and a global search that jumps straight to any subject. Cached lists render before the network responds, so the app never opens to a blank screen or a spinner. Staff use a React + TypeScript dashboard that writes everything the app reads: they upload PDFs by drag-and-drop and create or rename sections, subjects, and exam types on the fly, all of which appear in students\' hands without an app-store release. Writes are restricted to a named admin allowlist enforced by server-side security rules; reads stay public, because open access is the point of the product. Both apps talk to the same Firebase project (Auth, Firestore, Storage, Hosting) — no backend service to deploy, patch, or pay for. The interesting problem: the mobile app ships with its subject lists compiled into the binary, so anything an admin adds has to reach students who are still running an older build — solved by layering the admin\'s data as Firestore overlays on top of the app\'s built-in defaults, with the built-ins acting as the offline fallback. The subtler problem was renaming: every uploaded file is keyed by its subject name, so a naive rename would orphan hundreds of PDFs, or worse, silently empty the subject for every user who hadn\'t updated yet — solved by separating each record\'s immutable storage key from its display label, so renaming changes only what\'s shown, files never move, and older builds keep working untouched.'
@@ -103,7 +103,7 @@ export default {
                 { href: 'https://apps.apple.com/us/app/loopfruit/id6801919373', label: 'APP STORE', mark: 'appStore' },
                 { href: 'https://play.google.com/store/apps/details?id=com.salah.loopfruit', label: 'PLAY STORE', mark: 'playStore' }
             ],
-            images: ['/images/projects/loopfruit-1.png']
+            images: ['/images/projects/loopfruit-hero.png', '/images/projects/loopfruit-1.png']
         },
         {
             name: 'Mood',
