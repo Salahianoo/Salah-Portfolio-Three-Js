@@ -153,8 +153,7 @@ export default class Project
         this.floor.container.add(this.floor.mesh)
 
         // `status` and `links` are independent: a project can show either one,
-        // both, or neither. When both are present (Mood: sold to a single
-        // venue, but worth visiting in person) they stack vertically and sit
+        // both, or neither. When both are present they stack vertically and sit
         // on their own, closer anchor — the single-label anchor (-3) put a
         // stacked pair 6+ units from the name/description text painted on
         // the floor above them, reading as disconnected from the rest of the
@@ -209,9 +208,8 @@ export default class Project
         }
 
         // Real destinations: one clickable pad each. A `label` swaps the baked
-        // "OPEN" texture for custom generated text — e.g. Mood's "CHECK OUT
-        // THE STORE", pointing at the physical venue rather than an app
-        // listing, or LoopFruit's two store names.
+        // "OPEN" texture for custom generated text — LoopFruit's two store
+        // names, or Mood's "LAUNCH THE SIMULATOR".
         //
         // Several pads spread along x rather than stacking in y, centred on the
         // floor as a pair.
@@ -255,23 +253,37 @@ export default class Project
                 // because that is what decides how big the lettering reads
                 // once the texture is on the pad.
                 //
-                // A long label such as Mood's "CHECK OUT THE STORE" falls
-                // under the 50 floor, so it keeps the size it always had and
-                // `maxWidth` condenses it to the full width — matching the
-                // squeeze on "COMING SOON" beside it, which is what that size
-                // was originally measured for. A short one like "PLAY STORE"
-                // has slack instead: at 50 it covered barely half the canvas
-                // and read visibly weaker than the baked "OPEN" texture, so it
-                // is scaled up until it fills the same width.
+                // A long label falls under the 50 floor, so `maxWidth`
+                // condenses it to the full width. A short one like "PLAY
+                // STORE" has slack instead: at 50 it covered barely half the
+                // canvas and read visibly weaker than the baked "OPEN" texture,
+                // so it is scaled up until it fills the same width.
+                //
+                // `labelScale` enlarges the label for a pad whose text is the
+                // whole point of it. The canvas grows with the plane rather
+                // than the plane being stretched over the same 512px texture —
+                // with NearestFilter that would put visible square pixels on
+                // the one label meant to be looked at. At 2.8 the plane is 5.6
+                // wide, still inside the pad's 6.4-wide frame.
+                const scale = _link.labelScale || 1
+
                 item.texture = createTextTexture(
-                    [{ text: _link.label, x: 16, y: 64, fontSize: fitFontSize(_link.label), fontWeight: 900, color: '#ffffff', maxWidth: 480 }],
-                    { width: 512, height: 128 }
+                    [{
+                        text: _link.label,
+                        x: 16 * scale,
+                        y: 64 * scale,
+                        fontSize: fitFontSize(_link.label, { maxWidth: 480 * scale, min: 50 * scale, max: 90 * scale }),
+                        fontWeight: 900,
+                        color: '#ffffff',
+                        maxWidth: 480 * scale
+                    }],
+                    { width: Math.round(512 * scale), height: Math.round(128 * scale) }
                 )
                 item.texture.magFilter = THREE.NearestFilter
                 item.texture.minFilter = THREE.LinearFilter
 
                 item.labelMesh = new THREE.Mesh(
-                    new THREE.PlaneGeometry(2, 0.5),
+                    new THREE.PlaneGeometry(2 * scale, 0.5 * scale),
                     new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false, color: 0xffffff, alphaMap: item.texture })
                 )
             }

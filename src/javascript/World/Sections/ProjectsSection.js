@@ -242,19 +242,19 @@ export default class ProjectsSection
             // Every destination a project has, normalised to one shape. A
             // project may declare `links: [{ href, label, mark }]` for something
             // on more than one store (LoopFruit), or the original single
-            // `link` / `linkLabel` / `linkMark` trio, or neither. `label` swaps
-            // the default baked "OPEN" texture for custom text, and `mark`
-            // stands a store logo on the pad beside it.
+            // `link` / `linkLabel` / `linkMark` / `linkLabelScale` set, or
+            // neither. `label` swaps the default baked "OPEN" texture for custom
+            // text, `mark` stands a store logo on the pad beside it, and
+            // `labelScale` draws that text larger than usual.
             //
             // `status` stays independent of all of it — Project.js can render
-            // either, both (a status plus a link, e.g. Mood: sold to one venue
-            // but worth visiting), or neither.
+            // either, both (a status plus a link), or neither.
             const links = _project.links && _project.links.length > 0
                 ? _project.links
                     .filter((_link) => Boolean(_link.href))
-                    .map((_link) => ({ href: _link.href, label: _link.label || null, mark: _link.mark || null }))
+                    .map((_link) => ({ href: _link.href, label: _link.label || null, mark: _link.mark || null, labelScale: _link.labelScale || 1 }))
                 : _project.link
-                    ? [{ href: _project.link, label: _project.linkLabel || null, mark: _project.linkMark || null }]
+                    ? [{ href: _project.link, label: _project.linkLabel || null, mark: _project.linkMark || null, labelScale: _project.linkLabelScale || 1 }]
                     : []
 
             return {

@@ -56,8 +56,9 @@ export default {
      * out side by side across the floor, in the order listed — App Store
      * first, then Google Play. Two is the most that fits. `label`
      * replaces the default "OPEN" text, and `mark` ('appStore' or 'playStore')
-     * stands that store's logo on the pad. The single `link` form takes the
-     * same two as `linkLabel` and `linkMark`.
+     * stands that store's logo on the pad. `labelScale` draws the label
+     * bigger than usual (Mood's simulator button). The single `link` form
+     * takes the same three as `linkLabel`, `linkMark` and `linkLabelScale`.
      */
     projects: [
         {
@@ -112,15 +113,19 @@ export default {
             // ceiling before it runs off the label. The full version lives in
             // `caseStudy` below.
             description: 'Offline-first SaaS for a PS5 lounge & café. Flutter, Riverpod, Hive.',
-            // The app itself isn't public — it was sold to one venue — so the
-            // link points at that venue's real-world location instead of a
-            // store listing. linkLabel swaps the default "OPEN" for wording
-            // that matches: this is somewhere to visit, not something to
-            // install.
-            link: 'https://www.google.com/maps/place/Mood+playstation/@31.8826775,35.9335109,128m/data=!3m1!1e3!4m6!3m5!1s0x151b59f9bb0ec86d:0x808d4cbaf487c109!8m2!3d31.8826375!4d35.9338281!16s%2Fg%2F11srrlh__h?hl=en-JO&entry=ttu&g_ep=EgoyMDI2MDgxMC4wIKXMDSoASAFQAw%3D%3D',
-            linkLabel: 'CHECK OUT THE STORE',
-            status: 'SOLD TO THE STORE',
-            images: ['/images/projects/Mood-portfolio-1600x930.png'],
+            // Not on a store, but the production build runs in the browser, so
+            // the pad launches that simulator. `linkLabelScale` draws the label
+            // at 2.8x the usual size: it is the one call to action on this
+            // project, and at normal size a 20-character label is tiny.
+            link: 'https://salahianoo.github.io/mood-playstation-demo/#simulator',
+            linkLabel: 'LAUNCH THE SIMULATOR',
+            linkLabelScale: 2.8,
+            images: [
+                '/images/projects/mood-1-live-floor.png',
+                '/images/projects/mood-2-session-to-checkout.png',
+                '/images/projects/mood-3-owners-books.png',
+                '/images/projects/mood-4-try-it-live.png'
+            ],
             // Not rendered anywhere yet — kept for the planned per-project
             // pages. Nothing reads this field today.
             caseStudy: 'Mood is a full offline operations system for a PlayStation gaming lounge and its attached coffee shop, built solo end-to-end — product decisions, UI, and the offline data layer. Staff run the whole venue from one Android tablet with no internet dependency: PS5 rooms bill by the second from a persisted timestamp (never a fragile in-memory timer, so a killed app never loses time), a "waiting for a friend" mode lets a table open and sell drinks before billing starts, and the café POS is stock-linked — selling an item decrements inventory automatically and reverses cleanly if removed. The shift-accounting layer goes beyond "cash collected": every product tracks cost price against sale price, so the end-of-shift summary separates revenue from actual profit, with a running log of non-resale operational expenses (supplies) netted in too. Every closed bill gets a permanent sequential number, shared across both floors, and stays in a 48-hour lookback archive after its shift closes — with confirm-gated delete for corrections. Built in Flutter with Riverpod for state and Hive for fully offline, on-device persistence — no backend, no signal required on site.'
