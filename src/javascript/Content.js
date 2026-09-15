@@ -131,13 +131,6 @@ export default {
             caseStudy: 'Mood is a full offline operations system for a PlayStation gaming lounge and its attached coffee shop, built solo end-to-end — product decisions, UI, and the offline data layer. Staff run the whole venue from one Android tablet with no internet dependency: PS5 rooms bill by the second from a persisted timestamp (never a fragile in-memory timer, so a killed app never loses time), a "waiting for a friend" mode lets a table open and sell drinks before billing starts, and the café POS is stock-linked — selling an item decrements inventory automatically and reverses cleanly if removed. The shift-accounting layer goes beyond "cash collected": every product tracks cost price against sale price, so the end-of-shift summary separates revenue from actual profit, with a running log of non-resale operational expenses (supplies) netted in too. Every closed bill gets a permanent sequential number, shared across both floors, and stays in a 48-hour lookback archive after its shift closes — with confirm-gated delete for corrections. Built in Flutter with Riverpod for state and Hive for fully offline, on-device persistence — no backend, no signal required on site.'
         },
         {
-            name: 'Adatuna',
-            description: 'Arab heritage, curated. Arabic-first, RTL native.',
-            link: '',
-            status: 'COMING SOON',
-            images: ['/images/projects/adatuna-1.png']
-        },
-        {
             name: 'Aiodyx',
             // Longer than the other captions, so it wraps onto two lines on
             // the floor rather than being condensed to fit one (see wrapLines
