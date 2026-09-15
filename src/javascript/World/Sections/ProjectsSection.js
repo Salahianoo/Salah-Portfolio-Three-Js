@@ -34,17 +34,25 @@ export default class ProjectsSection
 
         // Spacing between consecutive projects. The tile path between two of
         // them runs from x + projectHalfWidth to x + interDistance -
-        // projectHalfWidth, so interDistance has to stay above twice the half
-        // width (12) or the connecting path inverts.
+        // projectHalfWidth, so under twice the half width (12) there is no
+        // room for tiles and none are laid.
         //
         // The floor panel is 16 wide, so at 16 the panels abutted and a pad on
         // one project sat right against its neighbour's. 20 leaves four units
         // of clear ground between panels.
         this.interDistance = 20
         // Tighter spacing used only between two projects in the same category
-        // group (see setLayout) — 14 is the floor with a 2-unit safety margin
-        // above the 12-unit limit above.
-        this.tightInterDistance = 14
+        // group (see setLayout), so the Odoo modules read as one row of work
+        // rather than three separate stops.
+        //
+        // What limits it is the floor text, not the boards: each project paints
+        // its own name and caption starting 4.72 left of its centre, and the
+        // widest Odoo one (Odoo ERP) ends 3.67 right of it. At 11 that leaves
+        // about 2.6 units of clear floor between one caption and the next; at 10
+        // they all but meet. Below 12 the connecting tile path above has
+        // nowhere to go and simply lays no tiles, which is what a cluster this
+        // close wants anyway.
+        this.tightInterDistance = 11
         this.positionRandomess = 4
         this.projectHalfWidth = 6
 
@@ -93,12 +101,31 @@ export default class ProjectsSection
         this.positions = []
         let cursor = this.x
 
+        // How far a project's row of boards reaches either side of its centre.
+        // Mirrors Project.boards.xInter (5) and the board plane's width
+        // (4.671); the projects are not built yet, so they cannot be asked.
+        const rowReach = (_project) =>
+        {
+            const count = Math.max(1, (_project.images || []).length)
+            return (count - 1) * 5 * 0.5 + 4.671 * 0.5
+        }
+
+        // Clear ground kept between the edge of one row of boards and the next
+        const boardClearance = 4
+
         for(let i = 0; i < Content.projects.length; i++)
         {
             if(i > 0)
             {
                 const sameGroup = this.categoryGroups.find((_group) => inGroup(i - 1, _group) && inGroup(i, _group))
-                cursor += (sameGroup && sameGroup.tight) ? this.tightInterDistance : this.interDistance
+                const spacing = (sameGroup && sameGroup.tight) ? this.tightInterDistance : this.interDistance
+
+                // A fixed spacing only works while rows are short. Two
+                // four-board rows side by side (Mood then Aiodyx) reach 9.8 each
+                // way, so at 20 apart their end boards all but touched. The gap
+                // grows just enough to keep them clear; short rows are unchanged.
+                const needed = rowReach(Content.projects[i - 1]) + rowReach(Content.projects[i]) + boardClearance
+                cursor += Math.max(spacing, needed)
             }
 
             this.positions.push(cursor)
